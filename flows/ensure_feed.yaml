@@ -1,0 +1,10 @@
+# Assume we are already on Feed. Bring app to foreground, then assert Feed is visible or fail.
+# App must already be running and user signed in (e.g. started by crux).
+appId: ${MAESTRO_APP_ID}
+---
+- launchApp:
+    stopApp: false
+- extendedWaitUntil:
+    visible: "Crucially"
+    timeout: 15000
+- assertVisible: "Crucially"

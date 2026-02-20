@@ -1,0 +1,18 @@
+# Comment flow: Scroll to first post and add a comment in its comment section.
+# App must already be running (e.g. started by crux). Assumes feed has at least one post. Run on either device.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- assertVisible: "New Post"
+# Tap comment field by stable id so focus is set before typing
+- extendedWaitUntil:
+    visible:
+      id: "comment_input_text_field"
+    timeout: 15000
+- tapOn:
+    id: "comment_input_text_field"
+- inputText: "E2E comment from Maestro"
+- tapOn:
+    id: "comment_submit"
+- assertVisible: "E2E comment from Maestro"

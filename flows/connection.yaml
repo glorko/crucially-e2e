@@ -1,0 +1,37 @@
+# Connection flow: Open Connections and show QR/code (Device A).
+# App must already be running (e.g. started by crux). Device B runs add_connection_paste.yaml with CONNECTION_CODE.
+# Assumes user is signed in. Leaves the code on screen so you can copy it for device B.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- assertVisible:
+    id: "app_bar_new_post"
+# Open profile drawer (sidebar)
+- tapOn:
+    id: "app_bar_profile_drawer"
+# Drawer loads connections async — wait for Connections button then tap (navigates to Connections screen, My Connections tab)
+- extendedWaitUntil:
+    visible: "Connections"
+    timeout: 8000
+- tapOn:
+    id: "drawer_connections_button"
+# Connections screen has tabs: Add Connection | My Connections. We landed on My Connections; switch to Add Connection tab.
+- extendedWaitUntil:
+    visible: "Add Connection"
+    timeout: 5000
+- tapOn: "Add Connection"
+# Add Connection tab: wait for code/scan UI
+- extendedWaitUntil:
+    visible: "Scan to Connect"
+    timeout: 10000
+# If code not yet shown, tap Generate Connection Code
+- runFlow:
+    when:
+      visible: "Generate Connection Code"
+    commands:
+      - tapOn: "Generate Connection Code"
+      - extendedWaitUntil:
+          visible: "Scan to Connect"
+          timeout: 10000
+# Leave screen open so device A's code is visible for device B (run add_connection_paste with CONNECTION_CODE)

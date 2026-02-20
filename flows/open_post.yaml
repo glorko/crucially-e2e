@@ -1,0 +1,17 @@
+# Open post flow: Tap the first post in the feed (by known E2E text) and assert comment section.
+# App must already be running (e.g. started by crux). Assumes feed has at least one post with this text (run post.yaml first). Run on either device.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- assertVisible: "New Post"
+# Wait for the E2E post to appear (from post flow or other device), then open it
+- extendedWaitUntil:
+    visible: "E2E test post from Maestro"
+    timeout: 30000
+- tapOn: "E2E test post from Maestro"
+# Assert we see the comment input (post is open)
+- extendedWaitUntil:
+    visible: "Write a comment..."
+    timeout: 5000
+- assertVisible: "Write a comment..."

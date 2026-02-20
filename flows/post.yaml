@@ -1,0 +1,29 @@
+# Post flow: Create a text post from Feed.
+# App must already be running (e.g. started by crux). Assumes user is signed in. Run on sender device (e.g. app1).
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+# Open New Post (create icon in app bar)
+- tapOn:
+    id: "app_bar_new_post"
+# Tap text field by stable id so focus is set before typing (avoids wrong-field / retry issues)
+- extendedWaitUntil:
+    visible:
+      id: "post_composer_text_field"
+    timeout: 10000
+- tapOn:
+    id: "post_composer_text_field"
+- extendedWaitUntil:
+    visible:
+      id: "post_composer_text_field"
+    timeout: 3000
+- inputText: "E2E test post from Maestro"
+- hideKeyboard
+# Scroll until Post button is visible (composer may be scrollable)
+- scrollUntilVisible:
+    element: "Post"
+    direction: DOWN
+    timeout: 5000
+- tapOn: "Post"
+- assertVisible: "E2E test post from Maestro"

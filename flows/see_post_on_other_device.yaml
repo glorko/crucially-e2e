@@ -1,0 +1,14 @@
+# See post on other device: After device A ran post.yaml, run this on device B.
+# Ensures feed is shown, pulls inbox on resume/tab, then waits for the post to appear.
+# App must already be running. Run on the RECEIVER device (B). Sender (A) runs post.yaml first.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- assertVisible: "New Post"
+# Stay on Feed (index 0); app pulls inbox on tab focus and on resume
+# Wait for the post created by the other device to appear (sync + pull may take a few seconds)
+- extendedWaitUntil:
+    visible: "E2E test post from Maestro"
+    timeout: 45000
+- assertVisible: "E2E test post from Maestro"

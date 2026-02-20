@@ -1,0 +1,37 @@
+# Add connection by pasting the other device's code (Device B).
+# Requires CONNECTION_CODE env var (the code shown on device A's Add Connection screen).
+# App must already be running. Run on the device that will RECEIVE the connection (B).
+# Device A runs connection.yaml first to show its code; then run this on B with CONNECTION_CODE=<code>.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- assertVisible: "New Post"
+- tapOn:
+    id: "app_bar_profile_drawer"
+- assertVisible: "Connections"
+- tapOn: "Connections"
+- extendedWaitUntil:
+    visible: "Add Connection"
+    timeout: 5000
+- tapOn: "Add Connection"
+- extendedWaitUntil:
+    visible: "Paste connection code"
+    timeout: 5000
+- tapOn: "Paste connection code"
+- extendedWaitUntil:
+    visible: "Paste code here"
+    timeout: 5000
+- tapOn:
+    text: "Paste code here"
+- inputText: ${CONNECTION_CODE}
+- tapOn: "Connect"
+- extendedWaitUntil:
+    visible:
+      any:
+        - "Connection added"
+        - "My Connections"
+        - "Connections:"
+    timeout: 15000
+- pressKey: Back
+- pressKey: Back

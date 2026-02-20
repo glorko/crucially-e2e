@@ -1,0 +1,14 @@
+# Notifications flow: Background app -> other device posts -> bring to foreground -> assert Updates/Feed.
+# App must already be running (e.g. started by crux). Do NOT use stopApp; use pressKey: Home so push can be delivered.
+# Run this on the RECEIVER device. Sender runs post.yaml in parallel or before.
+appId: ${MAESTRO_APP_ID}
+---
+- assertVisible: "New Post"
+# Send app to background (required for notifications to show)
+- pressKey: Home
+# Wait for sender to post and FCM to deliver (notification may appear in tray)
+- extendedWaitUntil:
+    visible: "You have new mail"
+    timeout: 30000
+- tapOn: "You have new mail"
+- assertVisible: "Feed"

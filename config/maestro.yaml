@@ -1,0 +1,6 @@
+# Maestro E2E config for Crucially
+# App IDs - override via env (MAESTRO_APP_ID_IOS, MAESTRO_APP_ID_ANDROID) if needed
+env:
+  APP_ID_IOS: "app.crucially.ios"
+  APP_ID_ANDROID: "app.crucially.android"
+  BACKEND_URL: "localhost:50051"
