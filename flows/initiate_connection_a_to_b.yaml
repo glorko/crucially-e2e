@@ -1,0 +1,47 @@
+# Initiate connection from device A to device B (A adds B by pasting B's code).
+# Run on device A. Prerequisite: device B has displayed its connection code — run connection.yaml
+# on device B, copy the code from B's screen, then set env CONNECTION_CODE to that code.
+#
+# Execution so far: we run e2e tests with a non-empty database for simplicity (e.g. pre-existing
+# connections and posts). In future, the full e2e flow will be tested from an empty database;
+# this flow will then be part of that sequence (B shows code → A pastes B's code → A and B connected).
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- assertVisible: "New Post"
+- tapOn:
+    id: "app_bar_profile_drawer"
+- assertVisible: "Connections"
+- tapOn:
+    id: "drawer_connections_button"
+- extendedWaitUntil:
+    visible: "Add Connection"
+    timeout: 5000
+- tapOn: "Add Connection"
+- extendedWaitUntil:
+    visible: "Paste connection code"
+    timeout: 5000
+- tapOn:
+    text: "Paste connection code"
+- inputText: ${CONNECTION_CODE}
+- tapOn: "Connect"
+# Confirm in dialog (Add Connection?)
+- extendedWaitUntil:
+    visible: "Add Connection?"
+    timeout: 15000
+- tapOn:
+    text: "Connect"
+- extendedWaitUntil:
+    visible:
+      any:
+        - "Connection created successfully"
+        - "Connections:"
+    timeout: 15000
+# App switches to My Connections tab; verify device A received the connection (list shows count)
+- extendedWaitUntil:
+    visible: "My Connections"
+    timeout: 5000
+- assertVisible: "Connections:"
+- pressKey: Back
+- pressKey: Back

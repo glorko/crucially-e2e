@@ -68,11 +68,13 @@ maestro test flows/connection.yaml
 | Flow | Description |
 |------|-------------|
 | `post.yaml` | Create a text post from Feed (New Post → type → Post). |
-| `comment.yaml` | Add a comment to the first post in the feed (Write a comment… → type → send). |
+| `comment.yaml` | Add a comment on the E2E post (waits for "E2E test post from Maestro", then comment input → type "E2E comment from Maestro" → send). Run on device B after `see_post_on_other_device.yaml` for comment-sync flow. |
 | `connection.yaml` | Open profile drawer → Connections → Add Connection; assert QR/code screen. |
 | `open_post.yaml` | Tap the first post in the feed (by E2E post text) and assert comment section is visible. Run after `post.yaml`. |
 | `add_connection_paste.yaml` | **Device B**: add connection by pasting A's code. Requires `CONNECTION_CODE` env var (code shown on A's Add Connection screen). Run after A ran `connection.yaml`. |
+| `initiate_connection_a_to_b.yaml` | **Device A**: initiate connection from A to B (A adds B by pasting B's code). Requires `CONNECTION_CODE` env var set to B's code. Run after B has displayed its code (`connection.yaml` on B). *Execution so far:* tests run with non-empty DB for simplicity; in future e2e will be tested from an empty database. |
 | `see_post_on_other_device.yaml` | **Receiver device**: ensure Feed, then wait for "E2E test post from Maestro" (up to 45s). Run on device B after device A ran `post.yaml`; requires A and B to be connected. |
+| `see_comment_on_other_device.yaml` | **Receiver device**: ensure Feed, then wait for "E2E comment from Maestro" (up to 45s). Run on device A after device B ran `comment.yaml`; verifies comment sync to connections. |
 | `ensure_feed.yaml` | Subflow: if login screen visible, tap sign-in and wait for Feed; then assert Feed. Used by other flows (app is already running). |
 | `type_text.yaml` | Subflow: type a string character-by-character (env: `TYPEWRITER_TEXT`). Used by post and comment flows so app typewriter/animation works. |
 | `notifications.yaml` | **Receiver device**: background app (`pressKey: Home`), wait for "You have new mail", tap notification. Do **not** use `stopApp` (push won’t be delivered). Run with `--with-notifications` (Android as receiver). |
@@ -101,6 +103,28 @@ maestro test flows/connection.yaml
 4. On **device A**: `maestro test --device $MAESTRO_DEVICE_ID_IOS flows/post.yaml`
 5. On **device B**: `maestro test --device $MAESTRO_DEVICE_ID_ANDROID flows/see_post_on_other_device.yaml`
 6. Optionally on B: `maestro test flows/open_post.yaml` to open the post and assert comment section.
+
+### Two-device comment sync (A posts, B comments, A sees comment)
+
+To verify that comments sync to connections (post author's connections receive the comment):
+
+1. Complete the two-device posting steps above so device A has posted and device B has seen the post.
+2. On **device B**: `maestro test --device $MAESTRO_DEVICE_ID_ANDROID flows/comment.yaml` (adds "E2E comment from Maestro" on the E2E post).
+3. On **device A**: bring the app to foreground (so PullInbox runs), then run:  
+   `maestro test --device $MAESTRO_DEVICE_ID_IOS flows/see_comment_on_other_device.yaml`  
+   This waits for "E2E comment from Maestro" to appear (up to 45s) and asserts it is visible.
+
+Flow order: **Device A** `post.yaml` → **Device B** `see_post_on_other_device.yaml` → **Device B** `comment.yaml` → **Device A** `see_comment_on_other_device.yaml`.
+
+### Initiate connection A→B (A adds B)
+
+This flow runs on **device A** and adds **device B** as a connection by pasting B's code.
+
+1. On **device B**: run `connection.yaml` so B's Add Connection screen shows the code; copy the code from B's screen.
+2. Set `CONNECTION_CODE=<code-from-B>` and on **device A** run:  
+   `maestro test --device $MAESTRO_DEVICE_ID_IOS flows/initiate_connection_a_to_b.yaml` (or Android device id if A is Android).
+
+**Execution so far:** e2e tests are run with a non-empty database for simplicity. In future, the full e2e flow will be tested from an empty database; this flow will be part of that sequence (B shows code → A pastes B's code → A and B connected).
 
 ## Notifications
 

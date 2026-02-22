@@ -1,10 +1,15 @@
-# Comment flow: Scroll to first post and add a comment in its comment section.
-# App must already be running (e.g. started by crux). Assumes feed has at least one post. Run on either device.
+# Comment flow: Add a comment on the E2E post. Run on the SENDER device (e.g. Device B) after see_post_on_other_device.yaml
+# so the E2E post is in the feed; the first comment input is then for that post.
+# Flow order: Device A post.yaml -> Device B see_post_on_other_device.yaml -> Device B comment.yaml -> Device A see_comment_on_other_device.yaml
 appId: ${MAESTRO_APP_ID}
 ---
 - runFlow:
     file: ensure_feed.yaml
 - assertVisible: "New Post"
+# Ensure E2E post is visible so we comment on the right post (first comment field = first post in feed)
+- extendedWaitUntil:
+    visible: "${MAESTRO_E2E_POST_TEXT}"
+    timeout: 30000
 # Tap comment field by stable id so focus is set before typing
 - extendedWaitUntil:
     visible:

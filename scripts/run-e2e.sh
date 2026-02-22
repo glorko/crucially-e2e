@@ -47,6 +47,10 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Unique post text for this run (timestamp so we don't match old posts with same text)
+export MAESTRO_E2E_POST_TEXT="${MAESTRO_E2E_POST_TEXT:-E2E test post from Maestro $(date +%Y-%m-%d_%H-%M-%S)}"
+echo "E2E post text for this run: $MAESTRO_E2E_POST_TEXT"
+
 if [ "$RUN_CRUX" = true ]; then
   echo "Ensure crux is running from $CRUCIALLY_ROOT with config $CONFIG_YAML"
   if [ ! -f "$CONFIG_YAML" ]; then
@@ -85,13 +89,17 @@ run_maestro() {
 }
 
 if [ "$RUN_BETWEEN_DEVICES" = true ]; then
-  echo "--- Between-devices (A posts, B sees). Assume devices already connected. ---"
-  echo "Step 1: Device A (iOS) — create post"
+  echo "--- Between-devices (iOS creates, Android receives — iOS has no push on simulator). Assume devices already connected. ---"
+  echo "Step 1: iOS — create post"
   run_maestro "$APP_ID_IOS" "post" "$DEVICE_ID_IOS"
-  echo "Step 2: Device B (Android) — see post from A"
+  echo "Step 2: Android — see post"
   run_maestro "$APP_ID_ANDROID" "see_post_on_other_device" "$DEVICE_ID_ANDROID"
-  echo "Step 3: Device B (Android) — open post and assert comment section"
+  echo "Step 3: Android — open post (comment section)"
   run_maestro "$APP_ID_ANDROID" "open_post" "$DEVICE_ID_ANDROID"
+  echo "Step 4: iOS — add comment"
+  run_maestro "$APP_ID_IOS" "comment" "$DEVICE_ID_IOS"
+  echo "Step 5: Android — see comment"
+  run_maestro "$APP_ID_ANDROID" "see_comment_on_other_device" "$DEVICE_ID_ANDROID"
   echo "Between-devices test finished."
 else
   MAIN_FLOWS=(post comment connection open_post see_post_on_other_device)

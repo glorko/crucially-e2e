@@ -7,9 +7,9 @@ appId: ${MAESTRO_APP_ID}
 - assertVisible: "New Post"
 # Wait for the E2E post to appear (from post flow or other device), then open it
 - extendedWaitUntil:
-    visible: "E2E test post from Maestro"
+    visible: "${MAESTRO_E2E_POST_TEXT}"
     timeout: 30000
-- tapOn: "E2E test post from Maestro"
+- tapOn: "${MAESTRO_E2E_POST_TEXT}"
 # Assert we see the comment input (post is open)
 - extendedWaitUntil:
     visible: "Write a comment..."
