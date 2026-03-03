@@ -1,0 +1,17 @@
+# Run on the OTHER device (e.g. Android) after the comment author (e.g. iOS) deleted the comment.
+# Verifies COMMENT_DELETED sync: open the post and assert the comment is no longer visible.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- runFlow:
+    file: open_post.yaml
+# After sync, the deleted comment must not be visible
+- extendedWaitUntil:
+    notVisible:
+      text: "${MAESTRO_E2E_COMMENT_TEXT}"
+    timeout: 5000
+    label: "Wait for comment to disappear after sync"
+- assertNotVisible:
+    text: "${MAESTRO_E2E_COMMENT_TEXT}"
+    label: "Comment deleted and synced: not visible on other device"

@@ -1,0 +1,30 @@
+# US-010: Delete own comment. Assumes post is open and has our comment (run comment.yaml first on this device).
+# Local soft-delete + COMMENT_DELETED published async; no sync/pull.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- runFlow:
+    file: open_post.yaml
+# Our comment (from comment.yaml) must be visible
+- extendedWaitUntil:
+    visible: "${MAESTRO_E2E_COMMENT_TEXT}"
+    timeout: 10000
+    label: "Wait for own comment"
+- scrollUntilVisible:
+    element:
+      text: "${MAESTRO_E2E_COMMENT_TEXT}"
+    direction: DOWN
+    timeout: 5000
+- tapOn:
+    id: "comment_options"
+# Menu opens: tap Delete
+- tapOn:
+    text: "Delete"
+# Confirmation dialog: tap Delete
+- tapOn:
+    text: "Delete"
+# Comment should disappear (list re-read from local DB)
+- assertNotVisible:
+    text: "${MAESTRO_E2E_COMMENT_TEXT}"
+    timeout: 3000

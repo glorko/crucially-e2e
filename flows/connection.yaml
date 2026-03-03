@@ -1,6 +1,7 @@
 # Connection flow: Open Connections and show QR/code (Device A).
-# App must already be running (e.g. started by crux). Device B runs add_connection_paste.yaml with CONNECTION_CODE.
-# Assumes user is signed in. Leaves the code on screen so you can copy it for device B.
+# Requires DB re-init (fresh backend state / connections). Irrelevant until all other tests are implemented.
+# When it is: this flow will run first (before post/comment/etc). Device B runs add_connection_paste.yaml with CONNECTION_CODE.
+# App must already be running (e.g. started by crux). Assumes user is signed in. Leaves the code on screen for device B.
 appId: ${MAESTRO_APP_ID}
 ---
 - runFlow:
