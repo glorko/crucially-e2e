@@ -28,7 +28,8 @@ APP_ID_IOS="${MAESTRO_APP_ID_IOS:-app.crucially.ios}"
 APP_ID_ANDROID="${MAESTRO_APP_ID_ANDROID:-app.crucially.android}"
 # Device IDs: default to crux config (app1 = iOS, app2 = Android). Override with MAESTRO_DEVICE_ID_IOS / MAESTRO_DEVICE_ID_ANDROID.
 DEVICE_ID_IOS="${MAESTRO_DEVICE_ID_IOS:-90266925-B62F-4741-A89E-EF11BFA0CC57}"
-DEVICE_ID_ANDROID="${MAESTRO_DEVICE_ID_ANDROID:-emulator-5556}"
+# Match crux config.yaml (app2_android uses emulator-5554)
+DEVICE_ID_ANDROID="${MAESTRO_DEVICE_ID_ANDROID:-emulator-5554}"
 
 RUN_CRUX=true
 PLATFORM=""
@@ -48,8 +49,10 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Unique post text for this run (timestamp so we don't match old posts with same text)
-export MAESTRO_E2E_POST_TEXT="${MAESTRO_E2E_POST_TEXT:-E2E test post from Maestro $(date +%Y-%m-%d_%H-%M-%S)}"
-echo "E2E post text for this run: $MAESTRO_E2E_POST_TEXT"
+export MAESTRO_E2E_POST_TEXT="${MAESTRO_E2E_POST_TEXT:-e2e post $(date +%s)}"
+export MAESTRO_E2E_COMMENT_TEXT="${MAESTRO_E2E_COMMENT_TEXT:-e2e comment $(date +%s)}"
+echo "E2E post text: $MAESTRO_E2E_POST_TEXT"
+echo "E2E comment text: $MAESTRO_E2E_COMMENT_TEXT"
 
 if [ "$RUN_CRUX" = true ]; then
   echo "Ensure crux is running from $CRUCIALLY_ROOT with config $CONFIG_YAML"
@@ -92,13 +95,15 @@ if [ "$RUN_BETWEEN_DEVICES" = true ]; then
   echo "--- Between-devices (iOS creates, Android receives — iOS has no push on simulator). Assume devices already connected. ---"
   echo "Step 1: iOS — create post"
   run_maestro "$APP_ID_IOS" "post" "$DEVICE_ID_IOS"
+  echo "Waiting 3s for backend to propagate..."
+  sleep 3
   echo "Step 2: Android — see post"
   run_maestro "$APP_ID_ANDROID" "see_post_on_other_device" "$DEVICE_ID_ANDROID"
-  echo "Step 3: Android — open post (comment section)"
-  run_maestro "$APP_ID_ANDROID" "open_post" "$DEVICE_ID_ANDROID"
-  echo "Step 4: iOS — add comment"
+  echo "Step 3: iOS — add comment"
   run_maestro "$APP_ID_IOS" "comment" "$DEVICE_ID_IOS"
-  echo "Step 5: Android — see comment"
+  echo "Waiting 3s for backend to propagate..."
+  sleep 3
+  echo "Step 4: Android — see comment"
   run_maestro "$APP_ID_ANDROID" "see_comment_on_other_device" "$DEVICE_ID_ANDROID"
   echo "Between-devices test finished."
 else

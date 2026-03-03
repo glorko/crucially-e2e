@@ -1,14 +1,17 @@
-# See comment on other device: Run on the RECEIVER device (e.g. Device A) after the sender (Device B)
-# has created the E2E post and added a comment. Verifies comment sync to connections.
-# Flow order: Device A post.yaml -> Device B see_post_on_other_device.yaml -> Device B comment.yaml -> Device A see_comment_on_other_device.yaml
-# App must already be running. Run on the RECEIVER device (A). Ensure Device A pulls inbox (e.g. bring app to foreground).
+# See comment on other device: Run on the RECEIVER device after the sender ran comment.yaml.
+# Verifies comment sync to connections. Between-devices flow: A posts -> B sees post -> A comments -> B sees comment.
+# App must already be running. Run on the RECEIVER device. ensure_feed brings app to foreground and triggers pull.
 appId: ${MAESTRO_APP_ID}
 ---
 - runFlow:
     file: ensure_feed.yaml
-- assertVisible: "New Post"
+- assertVisible:
+    id: "app_bar_new_post"
 # Wait for the comment created on the other device to appear (sync + pull may take a few seconds)
 - extendedWaitUntil:
-    visible: "E2E comment from Maestro"
-    timeout: 45000
-- assertVisible: "E2E comment from Maestro"
+    visible: "${MAESTRO_E2E_COMMENT_TEXT}"
+    timeout: 10000
+    label: "Wait for comment: ${MAESTRO_E2E_COMMENT_TEXT}"
+- assertVisible:
+    text: "${MAESTRO_E2E_COMMENT_TEXT}"
+    label: "Assert comment visible: ${MAESTRO_E2E_COMMENT_TEXT}"

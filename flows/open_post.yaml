@@ -4,12 +4,16 @@ appId: ${MAESTRO_APP_ID}
 ---
 - runFlow:
     file: ensure_feed.yaml
-- assertVisible: "New Post"
+- assertVisible:
+    id: "app_bar_new_post"
 # Wait for the E2E post to appear (from post flow or other device), then open it
 - extendedWaitUntil:
     visible: "${MAESTRO_E2E_POST_TEXT}"
     timeout: 30000
-- tapOn: "${MAESTRO_E2E_POST_TEXT}"
+    label: "Wait for post: ${MAESTRO_E2E_POST_TEXT}"
+- tapOn:
+    text: "${MAESTRO_E2E_POST_TEXT}"
+    label: "Tap post: ${MAESTRO_E2E_POST_TEXT}"
 # Assert we see the comment input (post is open)
 - extendedWaitUntil:
     visible: "Write a comment..."

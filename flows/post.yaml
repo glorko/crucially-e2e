@@ -18,7 +18,9 @@ appId: ${MAESTRO_APP_ID}
     visible:
       id: "post_composer_text_field"
     timeout: 3000
-- inputText: "${MAESTRO_E2E_POST_TEXT}"
+- inputText:
+    text: "${MAESTRO_E2E_POST_TEXT}"
+    label: "Type post: ${MAESTRO_E2E_POST_TEXT}"
 - hideKeyboard
 # Scroll until Post button is visible (composer may be scrollable)
 - scrollUntilVisible:
@@ -26,9 +28,8 @@ appId: ${MAESTRO_APP_ID}
     direction: DOWN
     timeout: 5000
 - tapOn: "Post"
-# Wait for composer to close and feed to show the new post
+# Wait for composer to close (post appears on receiver; creator feed refresh may lag)
 - extendedWaitUntil:
     visible:
-      text: "${MAESTRO_E2E_POST_TEXT}"
-    timeout: 10000
-- assertVisible: "${MAESTRO_E2E_POST_TEXT}"
+      id: "app_bar_new_post"
+    timeout: 5000

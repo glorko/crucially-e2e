@@ -1,15 +1,23 @@
-# Comment flow: Add a comment on the E2E post. Run on the SENDER device (e.g. Device B) after see_post_on_other_device.yaml
-# so the E2E post is in the feed; the first comment input is then for that post.
-# Flow order: Device A post.yaml -> Device B see_post_on_other_device.yaml -> Device B comment.yaml -> Device A see_comment_on_other_device.yaml
+# Comment flow: Add a comment on the E2E post. Run on the device that will SEND the comment.
+# Between-devices: A posts -> B sees post -> A comments -> B sees comment. A runs this after post.yaml.
+# The E2E post must be in the feed; the first comment input (newest post) is for that post.
 appId: ${MAESTRO_APP_ID}
 ---
 - runFlow:
     file: ensure_feed.yaml
-- assertVisible: "New Post"
+- assertVisible:
+    id: "app_bar_new_post"
 # Ensure E2E post is visible so we comment on the right post (first comment field = first post in feed)
 - extendedWaitUntil:
     visible: "${MAESTRO_E2E_POST_TEXT}"
     timeout: 30000
+    label: "Wait for post: ${MAESTRO_E2E_POST_TEXT}"
+# Scroll until comment input is visible (may be below fold for first post)
+- scrollUntilVisible:
+    element:
+      id: "comment_input_text_field"
+    direction: DOWN
+    timeout: 5000
 # Tap comment field by stable id so focus is set before typing
 - extendedWaitUntil:
     visible:
@@ -17,7 +25,11 @@ appId: ${MAESTRO_APP_ID}
     timeout: 15000
 - tapOn:
     id: "comment_input_text_field"
-- inputText: "E2E comment from Maestro"
+- inputText:
+    text: "${MAESTRO_E2E_COMMENT_TEXT}"
+    label: "Type comment: ${MAESTRO_E2E_COMMENT_TEXT}"
 - tapOn:
     id: "comment_submit"
-- assertVisible: "E2E comment from Maestro"
+- assertVisible:
+    text: "${MAESTRO_E2E_COMMENT_TEXT}"
+    label: "Assert comment visible: ${MAESTRO_E2E_COMMENT_TEXT}"
