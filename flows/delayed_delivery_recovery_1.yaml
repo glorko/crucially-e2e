@@ -1,0 +1,15 @@
+# Part 1: Android disables airplane, opens app, taps Settings → Refresh feed (starts recovery), returns to Feed.
+# Run before peer_trigger_sync (iOS) then delayed_delivery_recovery_2 (Android wait + assert).
+appId: ${MAESTRO_APP_ID}
+---
+- setAirplaneMode: disabled
+- runFlow:
+    file: ensure_feed.yaml
+- assertVisible:
+    id: "app_bar_new_post"
+- tapOn:
+    id: "nav_settings"
+- tapOn:
+    id: "settings_refresh_feed"
+- tapOn:
+    id: "nav_feed"

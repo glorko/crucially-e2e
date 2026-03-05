@@ -1,0 +1,6 @@
+# Run on Android (receiver) before iOS posts. Enables airplane mode so the device
+# does not receive real-time delivery; then clearing Redis makes sense for delayed-delivery E2E.
+# Android only (setAirplaneMode is no-op on iOS).
+appId: ${MAESTRO_APP_ID}
+---
+- setAirplaneMode: enabled

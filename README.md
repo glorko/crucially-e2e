@@ -56,7 +56,7 @@ maestro test flows/connection.yaml
 ./scripts/run-e2e.sh --ios-only
 ./scripts/run-e2e.sh --android-only
 ./scripts/run-e2e.sh --with-notifications  # Also run notifications flow (Android as receiver; two devices required)
-./scripts/run-e2e.sh --between-devices     # Two-device test: A shows code, B pastes, A posts, B sees post
+./scripts/run-e2e.sh --delayed-delivery   # Android offline → iOS post → clear Redis → Android Sync → assert recovered post
 ./scripts/run-e2e.sh --no-crux --flow post # Run only the post flow (for quick iteration)
 ```
 
@@ -76,8 +76,11 @@ maestro test flows/connection.yaml
 | `see_post_on_other_device.yaml` | **Receiver device**: ensure Feed, then wait for "E2E test post from Maestro" (up to 45s). Run on device B after device A ran `post.yaml`; requires A and B to be connected. |
 | `see_comment_on_other_device.yaml` | **Receiver device**: ensure Feed, then wait for "E2E comment from Maestro" (up to 45s). Run on device A after device B ran `comment.yaml`; verifies comment sync to connections. |
 | `ensure_feed.yaml` | Subflow: if login screen visible, tap sign-in and wait for Feed; then assert Feed. Used by other flows (app is already running). |
+| `android_enable_airplane.yaml` | **Android only**: enable airplane mode. Run before iOS post in delayed-delivery E2E so receiver is offline. |
+| `delayed_delivery_recovery.yaml` | **Android**: disable airplane, ensure feed, Settings → Refresh feed, back to Feed, wait for post (env: `MAESTRO_E2E_DELAYED_POST_TEXT`). Run after `android_enable_airplane` → iOS post → `redis_clear_delivery_queue.sh`. |
 | `type_text.yaml` | Subflow: type a string character-by-character (env: `TYPEWRITER_TEXT`). Used by post and comment flows so app typewriter/animation works. |
-| `notifications.yaml` | **Receiver device**: background app (`pressKey: Home`), wait for "You have new mail", tap notification. Do **not** use `stopApp` (push won’t be delivered). Run with `--with-notifications` (Android as receiver). |
+| `notifications.yaml` | **Receiver device**: background app (`pressKey: Home`), wait for "You have new mail", tap notification. Do **not** use `stopApp` (push won't be delivered). Run with `--with-notifications` (Android as receiver). |
+| `delayed_delivery_recovery.yaml` | **Receiver device (B)**: after Device A posted and Redis was cleared, open Settings → Refresh feed, then assert the post on Feed (hash-based recovery). See [Delayed delivery recovery](#delayed-delivery-recovery). |
 
 ### Two-device posting (A posts, B sees)
 
@@ -115,6 +118,38 @@ To verify that comments sync to connections (post author's connections receive t
    This waits for "E2E comment from Maestro" to appear (up to 45s) and asserts it is visible.
 
 Flow order: **Device A** `post.yaml` → **Device B** `see_post_on_other_device.yaml` → **Device B** `comment.yaml` → **Device A** `see_comment_on_other_device.yaml`.
+
+### Delayed delivery recovery
+
+Verifies hash-based recovery (US-012): **Device B (Android) is offline** so it never receives the post via real-time delivery; we clear the Redis delivery queue; then Device B goes online and taps **Settings → Refresh feed** and receives the post from the backend event store.
+
+**Prerequisites**: Backend wired with Redis event store (see `crucially-backend/internal/api/grpc/README.md`). Crux running (backend + iOS + Android). Two users connected. **Order matters**: Android must be offline *before* iOS posts, otherwise normal sync delivers the post in milliseconds and clearing Redis is pointless.
+
+**One-command run** (recommended):
+
+```bash
+./scripts/run-e2e.sh --delayed-delivery
+```
+
+This runs: Android airplane on → iOS post (unique text) → clear Redis delivery queue → Android airplane off + open app + Settings → Refresh feed → assert recovered post.
+
+**Manual steps** (same order):
+
+1. **Android**: enable airplane mode (so receiver is offline). With Maestro:  
+   `maestro test --device $MAESTRO_DEVICE_ID_ANDROID -e MAESTRO_APP_ID=app.crucially.android flows/android_enable_airplane.yaml`
+2. **iOS**: post with a unique text, e.g.  
+   `MAESTRO_E2E_POST_TEXT="e2e delayed $(date +%s)" maestro test --device $MAESTRO_DEVICE_ID_IOS -e MAESTRO_APP_ID=app.crucially.ios -e MAESTRO_E2E_POST_TEXT="…" flows/post.yaml`
+3. Clear the delivery queue (event store is left intact):  
+   `./scripts/redis_clear_delivery_queue.sh`  
+   (Uses `docker exec crucially-redis redis-cli`; set `REDIS_CONTAINER` if your Redis container has another name.)
+4. **Android**: run recovery flow (turns airplane off, ensure feed, Settings → Refresh feed, assert post):  
+   `MAESTRO_E2E_DELAYED_POST_TEXT="<same as step 2>" maestro test --device $MAESTRO_DEVICE_ID_ANDROID flows/delayed_delivery_recovery.yaml`
+
+**UI**: Use **Settings → Refresh feed** to trigger sync with recovery (no app bar button).
+
+**Scripts** (redis-cli via Docker; container from crux: `crucially-redis`, override with `REDIS_CONTAINER`):
+- `scripts/redis_clear_delivery_queue.sh` — clears the whole delivery queue (no params).
+- `scripts/redis_clear_deliveries_for_user.sh <user_id>` — clears deliveries for one user. Requires `jq` or `USE_PYTHON=1`.
 
 ### Initiate connection A→B (A adds B)
 
@@ -163,6 +198,7 @@ Notifications are shown only when the app is in the **background**. In Maestro:
 The Crucially app exposes test IDs for Maestro where needed:
 
 - `app_bar_new_post` — Create post button in app bar.
+- `settings_refresh_feed` — Settings: "Refresh feed" tile (triggers sync with hash-based recovery).
 - `app_bar_profile_drawer` — Profile/drawer button in app bar.
 - `comment_submit` — Send comment button.
 - `login_sign_in_button` — Sign-in button on login screen (Continue with Google / Apple).

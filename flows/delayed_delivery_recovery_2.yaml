@@ -1,0 +1,15 @@
+# Part 2: Wait for recovered post and assert. Run after delayed_delivery_recovery_1 (Android) and peer_trigger_sync (iOS).
+appId: ${MAESTRO_APP_ID}
+---
+# Allow time for peer to report, upload chunk, and Android to poll and apply
+- extendedWaitUntil:
+    visible: "${MAESTRO_E2E_DELAYED_POST_TEXT}"
+    timeout: 35000
+    label: "Wait for recovered post"
+- scrollUntilVisible:
+    element: "${MAESTRO_E2E_DELAYED_POST_TEXT}"
+    direction: DOWN
+    timeout: 10000
+- assertVisible:
+    text: "${MAESTRO_E2E_DELAYED_POST_TEXT}"
+    label: "Assert recovered post visible"

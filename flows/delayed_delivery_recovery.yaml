@@ -1,0 +1,35 @@
+# Delayed delivery recovery: run on Device B (Android) after:
+# 1. Android: airplane mode enabled (android_enable_airplane.yaml)
+# 2. Device A (iOS): posted with MAESTRO_E2E_DELAYED_POST_TEXT
+# 3. Redis delivery queue cleared: scripts/redis_clear_delivery_queue.sh
+# Then Device B has no deliveries in queue; we turn network back on, tap Settings → Refresh feed.
+# Backend starts peer recovery (recovery_id); Android polls GetRecoveryStatus until chunks_ready (FCM unreliable on iOS Sim).
+# iOS (peer) receives FCM recovery_request → ReportLastHash; upload_request → UploadRecoveryChunk. Android pulls chunks, applies, asserts post.
+# Requires: crux running, backend peer recovery (no event store).
+# Env: MAESTRO_E2E_DELAYED_POST_TEXT (post text to assert).
+appId: ${MAESTRO_APP_ID}
+---
+- setAirplaneMode: disabled
+- runFlow:
+    file: ensure_feed.yaml
+- assertVisible:
+    id: "app_bar_new_post"
+- tapOn:
+    id: "nav_settings"
+- tapOn:
+    id: "settings_refresh_feed"
+- tapOn:
+    id: "nav_feed"
+# Allow time for sync to complete and feed to refresh from local DB
+- extendedWaitUntil:
+    visible: "${MAESTRO_E2E_DELAYED_POST_TEXT}"
+    timeout: 25000
+    label: "Wait for recovered post"
+# Scroll down in case post is below fold (feed may have many items)
+- scrollUntilVisible:
+    element: "${MAESTRO_E2E_DELAYED_POST_TEXT}"
+    direction: DOWN
+    timeout: 10000
+- assertVisible:
+    text: "${MAESTRO_E2E_DELAYED_POST_TEXT}"
+    label: "Assert recovered post visible"

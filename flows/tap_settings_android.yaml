@@ -1,0 +1,12 @@
+# Minimal flow: open app, tap Settings tab (Android). Use to verify nav_settings is tappable.
+appId: ${MAESTRO_APP_ID}
+---
+- launchApp:
+    stopApp: false
+- extendedWaitUntil:
+    visible: "Crucially"
+    timeout: 10000
+- tapOn:
+    id: "nav_settings"
+- assertVisible:
+    text: "Refresh feed"

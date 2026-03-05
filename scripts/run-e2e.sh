@@ -3,8 +3,9 @@
 # Start crux separately (e.g. from repo root: crux -c config.yaml).
 #
 # Usage:
-#   ./scripts/run-e2e.sh [--ios-only|--android-only] [--with-notifications]
+#   ./scripts/run-e2e.sh [--ios-only|--android-only] [--with-notifications] [--delayed-delivery]
 #   iOS = author (post, comment, delete). Android = receiver (see post, see comment, assert comment gone after sync).
+#   --delayed-delivery: Android airplane on → iOS post → clear Redis → Android airplane off + Sync → assert recovered post.
 set -e
 
 # Ensure Maestro is on PATH (default install: ~/.maestro/bin)
@@ -22,11 +23,13 @@ DEVICE_ID_ANDROID="${MAESTRO_DEVICE_ID_ANDROID:-emulator-5554}"
 
 PLATFORM=""
 RUN_NOTIFICATIONS=false
+RUN_DELAYED_DELIVERY=false
 while [[ $# -gt 0 ]]; do
   case $1 in
     --ios-only) PLATFORM=ios; shift ;;
     --android-only) PLATFORM=android; shift ;;
     --with-notifications) RUN_NOTIFICATIONS=true; shift ;;
+    --delayed-delivery) RUN_DELAYED_DELIVERY=true; shift ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
 done
@@ -61,6 +64,34 @@ run_maestro() {
     maestro test "$E2E_ROOT/flows/${flow_name}.yaml"
   fi
 }
+
+if [ "$RUN_DELAYED_DELIVERY" = true ]; then
+  echo "--- Delayed delivery (Android offline → iOS post → clear Redis → Android Sync → assert) ---"
+  DELAYED_POST_TEXT="${MAESTRO_E2E_DELAYED_POST_TEXT:-e2e delayed $(date +%s)}"
+  export MAESTRO_E2E_POST_TEXT="$DELAYED_POST_TEXT"
+  export MAESTRO_E2E_DELAYED_POST_TEXT="$DELAYED_POST_TEXT"
+  echo "Delayed post text: $DELAYED_POST_TEXT"
+  echo "Step 0: Android — enable airplane mode (receiver offline)"
+  run_maestro "$APP_ID_ANDROID" "android_enable_airplane" "$DEVICE_ID_ANDROID"
+  sleep 2
+  echo "Step 1: iOS — create post"
+  run_maestro "$APP_ID_IOS" "post" "$DEVICE_ID_IOS"
+  echo "Waiting 2s for backend to store event..."
+  sleep 2
+  echo "Step 2: Clear Redis delivery queue (peer recovery; no event store)"
+  "$E2E_ROOT/scripts/redis_clear_delivery_queue.sh" || { echo "Warning: redis_clear_delivery_queue.sh failed (is Redis container running?)"; }
+  sleep 2
+  echo "Step 3a: Android — disable airplane, Settings → Refresh feed (starts recovery), back to Feed"
+  run_maestro "$APP_ID_ANDROID" "delayed_delivery_recovery_1" "$DEVICE_ID_ANDROID"
+  sleep 2
+  echo "Step 3b: iOS — trigger sync so peer gets pending_recovery_requests and calls ReportLastHash (FCM fallback)"
+  run_maestro "$APP_ID_IOS" "peer_trigger_sync" "$DEVICE_ID_IOS"
+  sleep 2
+  echo "Step 3c: Android — wait for recovered post, assert"
+  run_maestro "$APP_ID_ANDROID" "delayed_delivery_recovery_2" "$DEVICE_ID_ANDROID"
+  echo "Delayed delivery test finished."
+  exit 0
+fi
 
 echo "--- Between-devices (iOS = author, Android = receiver). Assume devices already connected. ---"
 if [ "$PLATFORM" = "ios" ] || [ -z "$PLATFORM" ]; then

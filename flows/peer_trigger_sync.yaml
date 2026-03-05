@@ -1,0 +1,12 @@
+# Trigger sync on peer (iOS) so it does PullInbox and gets pending_recovery_requests, then ReportLastHash.
+# Run on iOS device between delayed_delivery_recovery_1 and delayed_delivery_recovery_2.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- tapOn:
+    id: "nav_settings"
+- tapOn:
+    id: "settings_refresh_feed"
+- tapOn:
+    id: "nav_feed"
