@@ -1,0 +1,17 @@
+# US-004 two-device: After device A deleted a post (delete_post.yaml), device B should no longer see it.
+# Run on RECEIVER device. Sender runs delete_post.yaml first.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+# Trigger sync by bringing app to foreground (pull inbox will receive POST_DELETED)
+- assertVisible:
+    id: "app_bar_new_post"
+# Wait for sync to complete (POST_DELETED should remove the post)
+- extendedWaitUntil:
+    notVisible: "${MAESTRO_E2E_POST_TEXT}"
+    timeout: 15000
+    label: "Wait for deleted post to disappear"
+- assertNotVisible:
+    text: "${MAESTRO_E2E_POST_TEXT}"
+    label: "Assert deleted post gone on receiver"

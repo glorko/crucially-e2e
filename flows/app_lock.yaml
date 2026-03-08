@@ -1,0 +1,20 @@
+# US-019: Verify app lock toggle in Settings.
+# NOTE: Actual biometric auth cannot be automated by Maestro.
+# This flow verifies the setting UI is accessible.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- tapOn:
+    id: "nav_settings"
+    label: "Open Settings"
+- extendedWaitUntil:
+    visible: "Settings"
+    timeout: 5000
+# Verify app lock tile is visible
+- assertVisible:
+    id: "settings_app_lock"
+    label: "App Lock setting visible"
+# Go back to feed
+- tapOn:
+    id: "nav_feed"

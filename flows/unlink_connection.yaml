@@ -1,0 +1,30 @@
+# US-003: Unlink/remove a connection.
+# Requires at least one connection visible in the Connections screen.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+# Navigate to Connections
+- tapOn:
+    id: "nav_connections"
+    label: "Open Connections"
+- extendedWaitUntil:
+    visible: "Connections"
+    timeout: 5000
+# Tap the remove X on the first connection (uses position since IDs are dynamic)
+- tapOn:
+    text: "✕"
+    optional: true
+    label: "Tap remove on connection"
+# Confirmation dialog should appear
+- extendedWaitUntil:
+    visible: "Remove Connection?"
+    timeout: 3000
+    label: "Confirm dialog visible"
+# Cancel instead of actually removing (to keep the connection for other tests)
+- tapOn:
+    text: "Cancel"
+    label: "Cancel remove"
+# Go back to feed
+- tapOn:
+    id: "nav_feed"

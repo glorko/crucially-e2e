@@ -1,0 +1,31 @@
+# US-020: ToS/Privacy links — verify legal links exist in Settings.
+appId: ${MAESTRO_APP_ID}
+---
+- launchApp:
+    stopApp: false
+- tapOn:
+    id: "nav_feed"
+- extendedWaitUntil:
+    visible: "Crucially"
+    timeout: 10000
+- tapOn:
+    id: "nav_settings"
+    label: "Open Settings tab"
+- extendedWaitUntil:
+    visible: "Settings"
+    timeout: 10000
+# Assert legal links via Semantics IDs
+- extendedWaitUntil:
+    visible:
+      id: "settings_privacy_policy"
+    timeout: 5000
+    label: "Privacy Policy visible"
+- extendedWaitUntil:
+    visible:
+      id: "settings_terms"
+    timeout: 5000
+    label: "Terms of Service visible"
+# Go back to Feed
+- tapOn:
+    id: "nav_feed"
+    label: "Back to Feed"

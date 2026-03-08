@@ -1,0 +1,32 @@
+# US-025: Smart loudness — toggle sound in Settings.
+# Sound should be OFF by default (muted). Toggle ON, then back OFF.
+appId: ${MAESTRO_APP_ID}
+---
+- launchApp:
+    stopApp: false
+# Ensure we're on Feed first
+- tapOn:
+    id: "nav_feed"
+- extendedWaitUntil:
+    visible: "Crucially"
+    timeout: 10000
+# Navigate to Settings tab
+- tapOn:
+    id: "nav_settings"
+    label: "Open Settings tab"
+- extendedWaitUntil:
+    visible: "Settings"
+    timeout: 10000
+    label: "Settings screen loaded"
+# Tap sound toggle using Semantics identifier
+- tapOn:
+    id: "settings_sound_toggle"
+    label: "Toggle sound ON"
+# Tap again to disable
+- tapOn:
+    id: "settings_sound_toggle"
+    label: "Toggle sound OFF"
+# Go back to Feed
+- tapOn:
+    id: "nav_feed"
+    label: "Back to Feed"

@@ -1,0 +1,22 @@
+# US-008 two-device: Open Updates screen on RECEIVER after events synced.
+# Run AFTER the receiver has synced events from sender (post, comment, etc).
+# Expects at least one entry in the updates list.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+# Tap Updates tab
+- tapOn:
+    id: "nav_updates"
+    label: "Open Updates tab"
+# Wait for activity entries to load (not empty state)
+# After sync, the event_materializer records events in received_events.
+# Summary text contains "posted" or "commented" depending on event type.
+- extendedWaitUntil:
+    visible: "ago"
+    timeout: 10000
+    label: "Wait for updates entries"
+# Go back to Feed
+- tapOn:
+    id: "nav_feed"
+    label: "Back to Feed tab"

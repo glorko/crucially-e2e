@@ -1,0 +1,29 @@
+# US-002: Verify session invalid handling.
+# NOTE: Cannot simulate session invalidation in Maestro.
+# This flow verifies the app loads normally with a valid session.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+# If session is valid, feed should load normally
+- assertVisible:
+    text: "Crucially"
+    label: "Feed loads - session valid"
+# Navigate to settings to verify user is logged in
+- tapOn:
+    id: "nav_settings"
+- extendedWaitUntil:
+    visible: "Settings"
+    timeout: 5000
+# Verify logout button exists (means user is authenticated)
+- scrollUntilVisible:
+    element:
+      id: "settings_logout"
+    direction: DOWN
+    timeout: 5000
+- assertVisible:
+    id: "settings_logout"
+    label: "Logout visible - user authenticated"
+# Go back to feed
+- tapOn:
+    id: "nav_feed"

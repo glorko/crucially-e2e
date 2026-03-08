@@ -1,0 +1,42 @@
+# US-004: Delete own post via post detail screen.
+# Run on device that created the post.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+# Wait for our E2E post
+- extendedWaitUntil:
+    visible: "${MAESTRO_E2E_POST_TEXT}"
+    timeout: 10000
+    label: "Wait for own post"
+# Tap the post to open detail screen
+- tapOn:
+    text: "${MAESTRO_E2E_POST_TEXT}"
+    label: "Open post detail"
+# Wait for detail screen
+- extendedWaitUntil:
+    visible: "Write a comment..."
+    timeout: 5000
+# Tap the overflow menu
+- tapOn:
+    text: "Show menu"
+    label: "Open detail menu"
+# Tap Delete post
+- extendedWaitUntil:
+    visible: "Delete post"
+    timeout: 3000
+- tapOn:
+    text: "Delete post"
+    label: "Tap Delete post"
+# Confirmation dialog
+- extendedWaitUntil:
+    visible: "Delete Post?"
+    timeout: 3000
+- tapOn:
+    text: "Delete"
+    label: "Confirm delete"
+# After delete, app should navigate back to feed
+- extendedWaitUntil:
+    visible: "Crucially"
+    timeout: 5000
+    label: "Back on feed after delete"

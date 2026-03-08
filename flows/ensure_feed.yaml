@@ -1,10 +1,14 @@
-# Assume we are already on Feed. Bring app to foreground, then assert Feed is visible or fail.
-# App must already be running and user signed in (e.g. started by crux).
+# Helper: Ensure app is on the Feed screen, regardless of starting state.
+# Works on both iOS and Android by trying both back mechanisms.
 appId: ${MAESTRO_APP_ID}
 ---
 - launchApp:
     stopApp: false
-- extendedWaitUntil:
-    visible: "Crucially"
-    timeout: 15000
+# Press back (pops pushed routes on Android; no-op on iOS)
+- back
+# Tap Feed tab to ensure we're on feed (handles being on another tab)
+- tapOn:
+    id: "nav_feed"
+    optional: true
+# Assert we're on the feed
 - assertVisible: "Crucially"

@@ -1,0 +1,26 @@
+# US-001: Edit profile avatar from Settings screen.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+# Navigate to Settings
+- tapOn:
+    id: "nav_settings"
+    label: "Open Settings"
+- extendedWaitUntil:
+    visible: "Settings"
+    timeout: 5000
+# Tap on avatar to edit
+- tapOn:
+    id: "settings_edit_avatar"
+    label: "Tap avatar to edit"
+# Bottom sheet should appear
+- extendedWaitUntil:
+    visible: "Choose from Gallery"
+    timeout: 3000
+    label: "Avatar options visible"
+# Dismiss (can't automate system picker)
+- back
+# Go back to feed
+- tapOn:
+    id: "nav_feed"

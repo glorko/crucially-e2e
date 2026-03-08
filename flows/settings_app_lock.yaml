@@ -1,0 +1,26 @@
+# US-019: App lock — verify biometric toggle exists in Settings.
+appId: ${MAESTRO_APP_ID}
+---
+- launchApp:
+    stopApp: false
+- tapOn:
+    id: "nav_feed"
+- extendedWaitUntil:
+    visible: "Crucially"
+    timeout: 10000
+- tapOn:
+    id: "nav_settings"
+    label: "Open Settings tab"
+- extendedWaitUntil:
+    visible: "Settings"
+    timeout: 10000
+# Assert app lock tile via Semantics ID
+- extendedWaitUntil:
+    visible:
+      id: "settings_app_lock"
+    timeout: 5000
+    label: "App Lock setting visible"
+# Go back to Feed
+- tapOn:
+    id: "nav_feed"
+    label: "Back to Feed"
