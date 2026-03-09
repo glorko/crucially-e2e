@@ -150,6 +150,10 @@ echo "── Phase 5: Post lifecycle (single device) ──"
 run_ios   "tos_acceptance"   "US-020 ToS acceptance gate (iOS)" || true
 run_android "tos_acceptance" "US-020 ToS acceptance gate (Android)" || true
 
+# Content posting integration: create post and verify it appears on feed (same device)
+run_ios   "content_posting"  "Content posting integration (iOS)" || true
+run_android "content_posting" "Content posting integration (Android)" || true
+
 run_ios "post"              "Create post (iOS)" || true
 run_ios "open_post_detail"  "US-022 Post detail (iOS)" || true
 run_ios "edit_post"         "US-005 Edit post (iOS)" || true
@@ -212,7 +216,8 @@ if [ "$SKIP_CROSS_DEVICE" = false ] && [ -z "$PLATFORM" ]; then
   run_ios "post" "Cross-device: Create post (iOS)" || true
   sleep 3
 
-  echo "  Step 2: Android sees post"
+  echo "  Step 2: Android sees post (content posting integration receive)"
+  run_android "content_posting_receive" "Cross-device: Content posting receive (Android)" || true
   run_android "see_post_on_other_device" "Cross-device: See post (Android)" || true
 
   echo "  Step 3: iOS edits post"
