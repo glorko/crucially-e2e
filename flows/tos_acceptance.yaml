@@ -22,11 +22,11 @@ appId: ${MAESTRO_APP_ID}
 # Try to submit - should trigger ToS dialog
 - scrollUntilVisible:
     element:
-      text: "Post"
+      id: "post_composer_submit_button"
     direction: DOWN
     timeout: 5000
 - tapOn:
-    text: "Post"
+    id: "post_composer_submit_button"
     label: "Submit post"
 # ToS dialog should appear (if not already accepted)
 # Can't reliably test this as it depends on SharedPreferences state

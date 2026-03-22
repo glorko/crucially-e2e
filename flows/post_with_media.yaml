@@ -41,11 +41,11 @@ appId: ${MAESTRO_APP_ID}
 - hideKeyboard
 - scrollUntilVisible:
     element:
-      text: "Post"
+      id: "post_composer_submit_button"
     direction: DOWN
     timeout: 5000
 - tapOn:
-    text: "Post"
+    id: "post_composer_submit_button"
     label: "Submit post"
 - extendedWaitUntil:
     visible:

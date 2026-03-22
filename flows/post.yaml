@@ -22,12 +22,14 @@ appId: ${MAESTRO_APP_ID}
     text: "${MAESTRO_E2E_POST_TEXT}"
     label: "Type post: ${MAESTRO_E2E_POST_TEXT}"
 - hideKeyboard
-# Scroll until Post button is visible (composer may be scrollable)
+# Scroll until Post button is visible (composer body may scroll)
 - scrollUntilVisible:
-    element: "Post"
+    element:
+      id: "post_composer_submit_button"
     direction: DOWN
     timeout: 5000
-- tapOn: "Post"
+- tapOn:
+    id: "post_composer_submit_button"
 # Wait for composer to close (post appears on receiver; creator feed refresh may lag)
 - extendedWaitUntil:
     visible:
