@@ -4,7 +4,8 @@ appId: ${MAESTRO_APP_ID}
 - launchApp:
     stopApp: false
 - extendedWaitUntil:
-    visible: "Crucially"
+    visible:
+      id: "nav_feed"
     timeout: 10000
 - tapOn:
     id: "nav_settings"

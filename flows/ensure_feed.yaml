@@ -3,12 +3,23 @@
 appId: ${MAESTRO_APP_ID}
 ---
 - launchApp:
-    stopApp: false
-# Press back (pops pushed routes on Android; no-op on iOS)
-- back
+    stopApp: true
+# If composer/detail is open on iOS, close it explicitly.
+- tapOn:
+    text: "Close"
+    optional: true
+# Dismiss bottom sheets/popups that can hide bottom nav.
+- tapOn:
+    text: "Cancel"
+    optional: true
 # Tap Feed tab to ensure we're on feed (handles being on another tab)
 - tapOn:
     id: "nav_feed"
     optional: true
-# Assert we're on the feed
-- assertVisible: "Crucially"
+# Assert tab scaffold is visible and composer isn't blocking.
+- extendedWaitUntil:
+    visible:
+      id: "nav_feed"
+    timeout: 15000
+- assertNotVisible:
+    id: "post_composer_text_field"

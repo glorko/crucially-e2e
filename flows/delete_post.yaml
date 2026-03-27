@@ -37,6 +37,7 @@ appId: ${MAESTRO_APP_ID}
     label: "Confirm delete"
 # After delete, app should navigate back to feed
 - extendedWaitUntil:
-    visible: "Crucially"
+    visible:
+      id: "nav_feed"
     timeout: 5000
     label: "Back on feed after delete"

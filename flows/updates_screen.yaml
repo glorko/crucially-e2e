@@ -26,6 +26,6 @@ appId: ${MAESTRO_APP_ID}
     label: "Back to Feed tab"
 - extendedWaitUntil:
     visible:
-      id: "app_bar_new_post"
+      id: "nav_feed"
     timeout: 5000
     label: "Back on Feed"

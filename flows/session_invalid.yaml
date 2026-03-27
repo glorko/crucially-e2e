@@ -7,7 +7,7 @@ appId: ${MAESTRO_APP_ID}
     file: ensure_feed.yaml
 # If session is valid, feed should load normally
 - assertVisible:
-    text: "Crucially"
+    id: "nav_feed"
     label: "Feed loads - session valid"
 # Navigate to settings to verify user is logged in
 - tapOn:

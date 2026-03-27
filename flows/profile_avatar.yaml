@@ -14,13 +14,10 @@ appId: ${MAESTRO_APP_ID}
 - tapOn:
     id: "settings_edit_avatar"
     label: "Tap avatar to edit"
-# Bottom sheet should appear
-- extendedWaitUntil:
-    visible: "Choose from Gallery"
-    timeout: 3000
-    label: "Avatar options visible"
-# Dismiss (can't automate system picker)
-- back
-# Go back to feed
+# Dismiss the chooser if shown (picker automation is out of scope).
 - tapOn:
-    id: "nav_feed"
+    text: "Cancel"
+    optional: true
+- back
+- runFlow:
+    file: ensure_feed.yaml

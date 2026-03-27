@@ -7,7 +7,7 @@ appId: ${MAESTRO_APP_ID}
     file: ensure_feed.yaml
 # Verify feed loads without storage warning banner
 - assertVisible:
-    text: "Crucially"
+    id: "nav_feed"
     label: "Feed title visible - no storage issues"
 # Open composer to verify media button is accessible (not disabled)
 - tapOn:
