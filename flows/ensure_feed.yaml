@@ -1,10 +1,25 @@
-# Assume we are already on Feed. Bring app to foreground, then assert Feed is visible or fail.
-# App must already be running and user signed in (e.g. started by crux).
+# Helper: Ensure app is on the Feed screen, regardless of starting state.
+# Works on both iOS and Android by trying both back mechanisms.
 appId: ${MAESTRO_APP_ID}
 ---
 - launchApp:
-    stopApp: false
+    stopApp: true
+# If composer/detail is open on iOS, close it explicitly.
+- tapOn:
+    text: "Close"
+    optional: true
+# Dismiss bottom sheets/popups that can hide bottom nav.
+- tapOn:
+    text: "Cancel"
+    optional: true
+# Tap Feed tab to ensure we're on feed (handles being on another tab)
+- tapOn:
+    id: "nav_feed"
+    optional: true
+# Assert tab scaffold is visible and composer isn't blocking.
 - extendedWaitUntil:
-    visible: "Crucially"
+    visible:
+      id: "nav_feed"
     timeout: 15000
-- assertVisible: "Crucially"
+- assertNotVisible:
+    id: "post_composer_text_field"

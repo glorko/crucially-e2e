@@ -1,0 +1,17 @@
+# US-005 two-device: After device A edited a post (edit_post.yaml), device B sees the updated text.
+# Run on RECEIVER device. Sender runs edit_post.yaml first.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+# Trigger sync by bringing app to foreground
+- assertVisible:
+    id: "app_bar_new_post"
+# Wait for the edited text to appear (POST_EDITED sync)
+- extendedWaitUntil:
+    visible: "${MAESTRO_E2E_EDITED_POST_TEXT}"
+    timeout: 15000
+    label: "Wait for edited post: ${MAESTRO_E2E_EDITED_POST_TEXT}"
+- assertVisible:
+    text: "${MAESTRO_E2E_EDITED_POST_TEXT}"
+    label: "Assert edited post visible on receiver"

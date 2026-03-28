@@ -1,0 +1,20 @@
+# Content posting integration (receiver): after another device created a post, ensure feed and verify post appears.
+# Run on device B after device A ran post.yaml or content_posting.yaml with same MAESTRO_E2E_POST_TEXT.
+# Triggers sync by pull-to-refresh then waits for the post.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- assertVisible:
+    id: "app_bar_new_post"
+# Pull down to refresh feed (trigger sync with backend)
+- scroll:
+    direction: DOWN
+    duration: 500
+- extendedWaitUntil:
+    visible: "${MAESTRO_E2E_POST_TEXT}"
+    timeout: 15000
+    label: "Post received: ${MAESTRO_E2E_POST_TEXT}"
+- assertVisible:
+    text: "${MAESTRO_E2E_POST_TEXT}"
+    label: "Content posting integration: post visible on receiver"

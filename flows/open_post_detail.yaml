@@ -1,0 +1,33 @@
+# US-022: Open post detail screen. Tap a post to open full detail view with comments.
+# Assumes feed has at least one post with E2E text (run post.yaml first).
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+# Wait for the E2E post
+- extendedWaitUntil:
+    visible: "${MAESTRO_E2E_POST_TEXT}"
+    timeout: 30000
+    label: "Wait for post: ${MAESTRO_E2E_POST_TEXT}"
+# Tap the post to open detail
+- tapOn:
+    text: "${MAESTRO_E2E_POST_TEXT}"
+    label: "Open post detail"
+# Assert detail screen loaded
+- extendedWaitUntil:
+    visible: "Write a comment..."
+    timeout: 5000
+    label: "Post detail loaded"
+- assertVisible:
+    text: "${MAESTRO_E2E_POST_TEXT}"
+    label: "Assert post content in detail"
+# Go back via iOS swipe from left edge
+- swipe:
+    start: 0%, 50%
+    end: 80%, 50%
+    duration: 300
+- extendedWaitUntil:
+    visible:
+      id: "nav_feed"
+    timeout: 5000
+    label: "Back on Feed"

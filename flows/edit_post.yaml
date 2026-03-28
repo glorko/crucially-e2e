@@ -1,0 +1,52 @@
+# US-005: Edit own post via post detail screen.
+# Run on device that created the post (run post.yaml first).
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+# Wait for our E2E post
+- extendedWaitUntil:
+    visible: "${MAESTRO_E2E_POST_TEXT}"
+    timeout: 10000
+    label: "Wait for own post"
+# Tap the post to open detail screen
+- tapOn:
+    text: "${MAESTRO_E2E_POST_TEXT}"
+    label: "Open post detail"
+# Wait for detail screen
+- extendedWaitUntil:
+    visible: "Write a comment..."
+    timeout: 5000
+# Tap the overflow menu
+- tapOn:
+    text: "Show menu"
+    label: "Open detail menu"
+# Tap Edit post
+- extendedWaitUntil:
+    visible: "Edit post"
+    timeout: 3000
+- tapOn:
+    text: "Edit post"
+    label: "Tap Edit post"
+# Edit dialog -- TextField auto-focused with cursor at end
+- extendedWaitUntil:
+    visible: "Edit Post"
+    timeout: 3000
+# Erase from end (cursor should be at end by default)
+- eraseText: 200
+- inputText:
+    text: "${MAESTRO_E2E_EDITED_POST_TEXT}"
+    label: "Type edited text"
+- tapOn:
+    text: "Save"
+    label: "Save edit"
+# Assert edited text visible on detail screen
+- extendedWaitUntil:
+    visible: "${MAESTRO_E2E_EDITED_POST_TEXT}"
+    timeout: 5000
+    label: "Assert edited post visible"
+# Go back to feed
+- swipe:
+    start: 0%, 50%
+    end: 80%, 50%
+    duration: 300

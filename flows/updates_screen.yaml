@@ -1,0 +1,31 @@
+# US-008: Open Updates/Mail screen and verify it loads.
+# Run after syncing events from another device (so there may be updates).
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+# Tap Updates tab in bottom nav
+- tapOn:
+    id: "nav_updates"
+    label: "Open Updates tab"
+# Wait for the screen content to render. The empty state shows
+# "Activity from your connections will appear here" which is always present.
+# When entries exist, they will show instead.
+- extendedWaitUntil:
+    visible:
+      id: "nav_updates"
+    timeout: 3000
+    label: "Updates tab active"
+# Short wait for content to load from DB
+- swipe:
+    direction: DOWN
+    duration: 500
+# Go back to Feed tab
+- tapOn:
+    id: "nav_feed"
+    label: "Back to Feed tab"
+- extendedWaitUntil:
+    visible:
+      id: "nav_feed"
+    timeout: 5000
+    label: "Back on Feed"

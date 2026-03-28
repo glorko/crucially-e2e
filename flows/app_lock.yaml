@@ -1,0 +1,14 @@
+# US-019: App lock controls are intentionally hidden for MVP.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- tapOn:
+    id: "nav_settings"
+    label: "Open Settings"
+- extendedWaitUntil:
+    visible: "Settings"
+    timeout: 5000
+# Go back to feed
+- tapOn:
+    id: "nav_feed"

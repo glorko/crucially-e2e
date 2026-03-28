@@ -27,4 +27,3 @@ appId: ${MAESTRO_APP_ID}
 # Comment should disappear (list re-read from local DB)
 - assertNotVisible:
     text: "${MAESTRO_E2E_COMMENT_TEXT}"
-    timeout: 3000

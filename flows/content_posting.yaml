@@ -1,0 +1,39 @@
+# Content posting integration: create a post and verify it appears on the feed (same device).
+# Validates the full path: composer → submit → feed refresh → post visible.
+# Use MAESTRO_E2E_POST_TEXT for unique post content (set by run-e2e-full.sh).
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- tapOn:
+    id: "app_bar_new_post"
+- extendedWaitUntil:
+    visible:
+      id: "post_composer_text_field"
+    timeout: 10000
+- tapOn:
+    id: "post_composer_text_field"
+- inputText:
+    text: "${MAESTRO_E2E_POST_TEXT}"
+    label: "Type post: ${MAESTRO_E2E_POST_TEXT}"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "post_composer_submit_button"
+    direction: DOWN
+    timeout: 5000
+- tapOn:
+    id: "post_composer_submit_button"
+# Wait for composer to close and feed to show the new post
+- extendedWaitUntil:
+    visible:
+      id: "app_bar_new_post"
+    timeout: 5000
+# Integration assert: the post we just created is visible on the feed
+- extendedWaitUntil:
+    visible: "${MAESTRO_E2E_POST_TEXT}"
+    timeout: 10000
+    label: "Post visible on feed: ${MAESTRO_E2E_POST_TEXT}"
+- assertVisible:
+    text: "${MAESTRO_E2E_POST_TEXT}"
+    label: "Content posting integration: post appears on feed"

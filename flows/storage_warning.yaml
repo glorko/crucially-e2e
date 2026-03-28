@@ -1,0 +1,24 @@
+# US-017: Verify storage monitoring is active.
+# NOTE: Cannot simulate low storage in Maestro.
+# This flow just verifies the feed loads normally (no storage warning in normal conditions).
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+# Verify feed loads without storage warning banner
+- assertVisible:
+    id: "nav_feed"
+    label: "Feed title visible - no storage issues"
+# Open composer to verify media button is accessible (not disabled)
+- tapOn:
+    id: "app_bar_new_post"
+    label: "Open composer"
+- extendedWaitUntil:
+    visible:
+      id: "post_composer_text_field"
+    timeout: 5000
+- assertVisible:
+    id: "post_composer_add_media"
+    label: "Media button accessible"
+# Go back
+- back

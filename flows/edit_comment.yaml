@@ -1,0 +1,49 @@
+# US-009: Edit own comment. Run on device that created the comment (run comment.yaml first).
+# Local edit with (edited) indicator.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- runFlow:
+    file: open_post.yaml
+# Wait for our comment to appear
+- extendedWaitUntil:
+    visible: "${MAESTRO_E2E_COMMENT_TEXT}"
+    timeout: 10000
+    label: "Wait for own comment"
+- scrollUntilVisible:
+    element:
+      text: "${MAESTRO_E2E_COMMENT_TEXT}"
+    direction: DOWN
+    timeout: 5000
+# Tap comment options menu
+- tapOn:
+    id: "comment_options"
+    label: "Open comment menu"
+# Tap Edit
+- tapOn:
+    text: "Edit"
+    label: "Tap Edit"
+# Edit dialog should appear
+- extendedWaitUntil:
+    visible: "Edit comment"
+    timeout: 3000
+# Clear and type new text
+- tapOn:
+    text: "${MAESTRO_E2E_COMMENT_TEXT}"
+- eraseText: 100
+- inputText:
+    text: "${MAESTRO_E2E_EDITED_COMMENT_TEXT}"
+    label: "Type edited comment"
+# Tap Save
+- tapOn:
+    text: "Save"
+    label: "Save edit"
+# Assert edited text and (edited) indicator appear
+- extendedWaitUntil:
+    visible: "${MAESTRO_E2E_EDITED_COMMENT_TEXT}"
+    timeout: 5000
+    label: "Assert edited comment visible"
+- assertVisible:
+    text: "(edited)"
+    label: "Assert (edited) indicator"

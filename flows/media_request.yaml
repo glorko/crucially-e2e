@@ -1,0 +1,18 @@
+# US-016: Verify media request placeholder.
+# NOTE: Cannot simulate missing media files in Maestro.
+# This flow verifies the feed loads and posts with media display correctly.
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+# Just verify the feed loads with posts
+- extendedWaitUntil:
+    visible:
+      id: "nav_feed"
+    timeout: 5000
+    label: "Feed loaded"
+# Verify posts are visible (at least the E2E post)
+- extendedWaitUntil:
+    visible: "${MAESTRO_E2E_POST_TEXT}"
+    timeout: 10000
+    label: "Post with potential media visible"
