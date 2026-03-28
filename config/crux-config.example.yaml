@@ -1,30 +1,21 @@
-# Copy to parent crucially repo as config.yaml or config.e2e.yaml
-# Used when running E2E: crux -c path/to/config.yaml
-backend:
-  path: "crucially-backend"
-  start_script: "start-backend.sh"
-  env:
-    DATABASE_URL: "postgres://postgres:postgres@localhost:5440/crucially?sslmode=disable"
-    REDIS_URL: "redis://localhost:6382"
-    PORT: "50051"
+# -----------------------------------------------------------------------------
+# Crucially E2E — Crux config pointer (NOT a standalone runnable stack file)
+# -----------------------------------------------------------------------------
+#
+# Crux 0.10+ uses the PLAYGROUND schema: `dependencies:` (list with check/start),
+# `services:`, `terminal:`. Older single-app examples with only `backend:` and
+# `flutter:` blocks are obsolete for this workspace.
+#
+# What to use
+#   1. Clone the full Crucially workspace (parent folder contains crucially-backend,
+#      crucially-mobile, and config.yaml).
+#   2. From that workspace root:  crux   or   crux -c config.yaml
+#
+# Documented reference (same shape as the root config, with comments):
+#   crucially-metadata/docs/crux_workspace_config.yaml
+#
+# This file is intentionally not a duplicate of the full stack; it prevents
+# copying a stale schema into a new repo.
+# -----------------------------------------------------------------------------
 
-flutter:
-  path: "crucially-mobile"
-  instances:
-    - name: "app1"
-      device_id: "90266925-B62F-4741-A89E-EF11BFA0CC57"
-      platform: "ios"
-    - name: "app2"
-      device_id: "Pixel_9a"
-      platform: "android"
-
-dependencies:
-  postgres:
-    host: "localhost"
-    port: 5440
-    database: "crucially"
-    user: "postgres"
-    password: "postgres"
-  redis:
-    host: "localhost"
-    port: 6382
+# (No YAML body — see workspace ../config.yaml and metadata docs above.)
