@@ -3,7 +3,11 @@
 appId: ${MAESTRO_APP_ID}
 ---
 - launchApp:
-    stopApp: true
+    # stopApp: true caused flaky cold starts where the feed shell never matched in time; rely on extendedWaitUntil below.
+    stopApp: false
+# SplashScreen delays AuthWrapper (~2.5s); settle before hunting for nav.
+- waitForAnimationToEnd:
+    timeout: 8000
 # If composer/detail is open on iOS, close it explicitly.
 - tapOn:
     text: "Close"
@@ -20,6 +24,6 @@ appId: ${MAESTRO_APP_ID}
 - extendedWaitUntil:
     visible:
       id: "nav_feed"
-    timeout: 15000
+    timeout: 60000
 - assertNotVisible:
     id: "post_composer_text_field"

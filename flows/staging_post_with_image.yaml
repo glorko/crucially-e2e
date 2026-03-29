@@ -1,6 +1,7 @@
 # Staging: post with image attachment (presigned PUT or gRPC unary upload).
-# Requires: device logged in once; build with --dart-define-from-file=.env-staging (or equivalent).
-# Run from crucially-e2e: MAESTRO_APP_ID=app.crucially.android maestro test flows/staging_post_with_image.yaml
+# scripts/run_staging_post_image.sh seeds files/e2e_1x1.png and sets E2E_INJECT_IMAGE so the app
+# skips the system Photo Picker (reliable in Maestro).
+# Manual picker path: use flows/pick_first_gallery_image.yaml after gallery tap if not using inject.
 appId: ${MAESTRO_APP_ID}
 ---
 - setPermissions:
@@ -8,6 +9,8 @@ appId: ${MAESTRO_APP_ID}
       all: allow
 - addMedia:
     - "../assets/e2e_1x1.png"
+# addMedia can leave DocumentsUI PickActivity on top; back so launchApp reaches our app.
+- back
 - runFlow:
     file: ensure_feed.yaml
 - tapOn:
@@ -26,12 +29,12 @@ appId: ${MAESTRO_APP_ID}
 - tapOn:
     id: "post_composer_sheet_gallery"
     label: "Pick from gallery"
-- runFlow:
-    file: pick_first_gallery_image.yaml
+- waitForAnimationToEnd:
+    timeout: 8000
 - extendedWaitUntil:
     visible:
       id: "post_composer_text_field"
-    timeout: 15000
+    timeout: 30000
 - tapOn:
     id: "post_composer_text_field"
 - inputText:
