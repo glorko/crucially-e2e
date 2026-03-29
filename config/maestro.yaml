@@ -3,4 +3,5 @@
 env:
   APP_ID_IOS: "app.crucially.ios"
   APP_ID_ANDROID: "app.crucially.android"
-  BACKEND_URL: "localhost:50051"
+  # Staging gRPC (matches crucially-mobile .env-staging); use localhost only for local-backend Maestro runs.
+  BACKEND_URL: "dev.grpc.crucially.app:39847"
