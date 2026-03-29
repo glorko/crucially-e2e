@@ -1,0 +1,28 @@
+# Select first thumbnail after system gallery / picker opens (addMedia must have run first).
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          id: "com.google.android.providers.media.module:id/icon_thumbnail"
+          optional: true
+      - tapOn:
+          id: "com.google.android.documentsui:id/thumbnail"
+          optional: true
+      - tapOn:
+          id: "com.android.documentsui:id/thumbnail"
+          optional: true
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          id: "PXGGridLayout-Info"
+          index: 0
+          optional: true
+      - tapOn:
+          text: "Photo, .*"
+          index: 0
+          optional: true

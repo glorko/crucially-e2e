@@ -1,0 +1,51 @@
+# Staging: post with image attachment (presigned PUT or gRPC unary upload).
+# Requires: device logged in once; build with --dart-define-from-file=.env-staging (or equivalent).
+# Run from crucially-e2e: MAESTRO_APP_ID=app.crucially.android maestro test flows/staging_post_with_image.yaml
+appId: ${MAESTRO_APP_ID}
+---
+- setPermissions:
+    permissions:
+      all: allow
+- addMedia:
+    - "../assets/e2e_1x1.png"
+- runFlow:
+    file: ensure_feed.yaml
+- tapOn:
+    id: "app_bar_new_post"
+- extendedWaitUntil:
+    visible:
+      id: "post_composer_text_field"
+    timeout: 10000
+- tapOn:
+    id: "post_composer_add_media"
+- extendedWaitUntil:
+    visible:
+      id: "post_composer_sheet_gallery"
+    timeout: 15000
+    label: "Media options sheet"
+- tapOn:
+    id: "post_composer_sheet_gallery"
+    label: "Pick from gallery"
+- runFlow:
+    file: pick_first_gallery_image.yaml
+- extendedWaitUntil:
+    visible:
+      id: "post_composer_text_field"
+    timeout: 15000
+- tapOn:
+    id: "post_composer_text_field"
+- inputText:
+    text: "Maestro staging image post"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "post_composer_submit_button"
+    direction: DOWN
+    timeout: 8000
+- tapOn:
+    id: "post_composer_submit_button"
+- extendedWaitUntil:
+    visible:
+      id: "app_bar_new_post"
+    timeout: 60000
+    label: "Composer closed after post"
