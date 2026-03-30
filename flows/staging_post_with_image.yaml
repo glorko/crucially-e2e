@@ -1,7 +1,6 @@
-# Staging: post with image attachment (presigned PUT or gRPC unary upload).
-# scripts/run_staging_post_image.sh seeds files/e2e_1x1.png and sets E2E_INJECT_IMAGE so the app
-# skips the system Photo Picker (reliable in Maestro).
-# Manual picker path: use flows/pick_first_gallery_image.yaml after gallery tap if not using inject.
+# Staging: post with image (presigned PUT or gRPC unary upload).
+# Requires an already signed-in user. Maestro addMedia puts e2e_1x1.png into the device gallery;
+# pick_first_gallery_image.yaml selects it from the system picker.
 appId: ${MAESTRO_APP_ID}
 ---
 - setPermissions:
@@ -31,6 +30,8 @@ appId: ${MAESTRO_APP_ID}
     label: "Pick from gallery"
 - waitForAnimationToEnd:
     timeout: 8000
+- runFlow:
+    file: pick_first_gallery_image.yaml
 - extendedWaitUntil:
     visible:
       id: "post_composer_text_field"

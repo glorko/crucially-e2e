@@ -13,7 +13,7 @@ Flows and coverage are defined by this README and the PRD §5.1 (Posting, Commen
   curl -Ls "https://get.maestro.mobile.dev" | bash
   maestro --version
   ```
-- **Crux**: Backend and two app instances (iOS simulator + Android emulator) are started via crux. Use the workspace root `config.yaml`. A commented reference copy is [crucially-metadata/docs/crux_workspace_config.yaml](../crucially-metadata/docs/crux_workspace_config.yaml).
+- **Crux**: Backend and two app instances (iOS simulator + Android emulator) are started via crux. Use the workspace root `config-local.yaml` (`crux -c config-local.yaml`). Default `config.yaml` is staging-mobile-only. A commented reference copy is [crucially-metadata/docs/crux_workspace_config.yaml](../crucially-metadata/docs/crux_workspace_config.yaml).
 - **Test accounts**: Use dedicated Firebase test accounts (Google on Android, Apple on iOS). Flows **handle auth when needed**: if the login screen is visible, they tap "Continue with Google" or "Continue with Apple" and wait for Feed. System OAuth dialogs may still require a one-time manual sign-in on the device; after that, sessions are reused.
 - **Backend**: Postgres, Redis, and (for push) FCM configured. Optional: test reset endpoint or script for clearing test data (see [Reset](#reset-to-default-state)).
 
@@ -23,7 +23,7 @@ Flows and coverage are defined by this README and the PRD §5.1 (Posting, Commen
 
 ```bash
 cd /path/to/crucially
-crux
+crux -c config-local.yaml
 ```
 
 This starts the backend and two Flutter apps (app1 = iOS, app2 = Android). Leave it running.
@@ -183,7 +183,7 @@ Notifications are shown only when the app is in the **background**. In Maestro:
 ## Config
 
 - `config/maestro.yaml` — App IDs and backend URL (env overrides: `MAESTRO_APP_ID_IOS`, `MAESTRO_APP_ID_ANDROID`).
-- `config/crux-config.example.yaml` — Pointer to the **playground** Crux schema used at the workspace root; authoritative file is `<workspace>/config.yaml`. See [crucially-metadata/docs/crux_workspace_config.yaml](../crucially-metadata/docs/crux_workspace_config.yaml).
+- `config/crux-config.example.yaml` — Pointer to Crux at the workspace root: default `config.yaml` (staging apps), full stack `config-local.yaml`. See [crucially-metadata/docs/crux_workspace_config.yaml](../crucially-metadata/docs/crux_workspace_config.yaml).
 
 ## Reusing this setup for other apps
 

@@ -9,7 +9,7 @@
 # What to use
 #   1. Clone the full Crucially workspace (parent folder contains crucially-backend,
 #      crucially-mobile, and config.yaml).
-#   2. From that workspace root:  crux   or   crux -c config.yaml
+#   2. From that workspace root:  crux -c config-local.yaml  (E2E / full local stack)
 #
 # Documented reference (same shape as the root config, with comments):
 #   crucially-metadata/docs/crux_workspace_config.yaml

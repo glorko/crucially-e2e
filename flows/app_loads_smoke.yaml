@@ -1,0 +1,12 @@
+# Smoke: cold start with cleared app data → splash → login (Railway/staging URL from build).
+# Android: MAESTRO_APP_ID_ANDROID=app.crucially.android maestro test flows/app_loads_smoke.yaml
+appId: ${MAESTRO_APP_ID_ANDROID}
+---
+- launchApp:
+    clearState: true
+    stopApp: true
+# Unauthenticated path: splash then login (Continue with Google on Android).
+- extendedWaitUntil:
+    visible:
+      id: "login_sign_in_button"
+    timeout: 35000

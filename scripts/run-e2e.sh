@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Run Maestro E2E tests (between-devices only). Assumes crux (backend + 2 app instances) is already running.
-# Start crux separately (e.g. from repo root: crux -c config.yaml).
+# Start crux separately (e.g. from repo root: crux -c config-local.yaml — full local backend + apps).
 #
 # Usage:
 #   ./scripts/run-e2e.sh [--ios-only|--android-only] [--with-notifications] [--delayed-delivery]
