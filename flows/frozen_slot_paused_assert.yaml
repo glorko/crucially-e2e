@@ -1,0 +1,19 @@
+# Optional regression: assert a frozen billing slot shows the Paused badge.
+# Manual / DB precondition: set the test user's slot subscription to past_due (or equivalent) so
+# syncFrozen is true for at least one occupied slot — see README (Frozen slots).
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- tapOn:
+    id: "nav_connections"
+- extendedWaitUntil:
+    visible: "Connections"
+    timeout: 10000
+- extendedWaitUntil:
+    visible:
+      id: "connection_slot_paused_badge"
+    timeout: 8000
+    label: "Paused badge on a connection slot"
+- assertVisible:
+    id: "connection_slot_paused_badge"

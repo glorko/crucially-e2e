@@ -1,0 +1,27 @@
+# Two-device sender: open first chat row, type MAESTRO_E2E_CHAT_MESSAGE_TEXT, send.
+# Prereq: users mutually connected; at least one pending DM or existing thread (chat_list_first_row).
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- tapOn:
+    id: "nav_chat"
+- extendedWaitUntil:
+    visible: "Chat"
+    timeout: 8000
+- tapOn:
+    id: "chat_list_first_row"
+- extendedWaitUntil:
+    visible:
+      id: "chat_message_input"
+    timeout: 10000
+    label: "Thread composer visible"
+- tapOn:
+    id: "chat_message_input"
+- inputText: "${MAESTRO_E2E_CHAT_MESSAGE_TEXT}"
+- tapOn:
+    id: "chat_send_button"
+- extendedWaitUntil:
+    visible: "${MAESTRO_E2E_CHAT_MESSAGE_TEXT}"
+    timeout: 15000
+    label: "Sent message visible in thread"

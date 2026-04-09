@@ -1,0 +1,15 @@
+# Two-device: After the author device ran edit_comment.yaml with MAESTRO_E2E_EDITED_COMMENT_TEXT,
+# the receiver sees the updated comment text on the feed (COMMENT_EDITED sync).
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- assertVisible:
+    id: "app_bar_new_post"
+- extendedWaitUntil:
+    visible: "${MAESTRO_E2E_EDITED_COMMENT_TEXT}"
+    timeout: 15000
+    label: "Wait for edited comment: ${MAESTRO_E2E_EDITED_COMMENT_TEXT}"
+- assertVisible:
+    text: "${MAESTRO_E2E_EDITED_COMMENT_TEXT}"
+    label: "Assert edited comment visible on receiver"

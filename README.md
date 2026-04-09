@@ -51,16 +51,16 @@ maestro test flows/connection.yaml
 ### 3. Using the run script
 
 ```bash
-./scripts/run-e2e.sh                    # Runs crux then Maestro (iOS + Android)
-./scripts/run-e2e.sh --no-crux         # Only Maestro (crux already running)
+./scripts/run-e2e.sh                    # Between-devices post/comment/delete (iOS + Android; crux must already be running)
 ./scripts/run-e2e.sh --ios-only
 ./scripts/run-e2e.sh --android-only
 ./scripts/run-e2e.sh --with-notifications  # Also run notifications flow (Android as receiver; two devices required)
 ./scripts/run-e2e.sh --delayed-delivery   # Android offline → iOS post → clear Redis → Android Sync → assert recovered post
-./scripts/run-e2e.sh --no-crux --flow post # Run only the post flow (for quick iteration)
+./scripts/run-e2e.sh --comment-edit-sync   # After B sees comment: iOS edit_comment → B see_comment_edited → delete uses edited text
+./scripts/run-e2e.sh --chat                # After main run: iOS chat_dm_send → Android chat_dm_receive (needs chat list row)
 ```
 
-- **Env**: `CRUCIALLY_ROOT` — path to Crucially repo (default: parent of this repo). `E2E_RESET_SCRIPT` — path to `crucially-backend/scripts/reset_test_data.sh` to run before tests. `E2E_RESET_URL` — optional HTTP reset endpoint.
+- **Env**: `CRUCIALLY_ROOT` — path to Crucially repo (default: parent of this repo). `E2E_RESET_SCRIPT` — path to `crucially-backend/scripts/reset_test_data.sh` to run before tests. `E2E_RESET_URL` — optional HTTP reset endpoint. **`MAESTRO_E2E_COMMENT_DELETE_TEXT`** — text `delete_comment` / `see_comment_deleted_on_other_device` target (defaults to `MAESTRO_E2E_COMMENT_TEXT`; after `--comment-edit-sync`, the script sets it to the edited string). **`MAESTRO_E2E_EDITED_COMMENT_TEXT`** — used by `edit_comment.yaml` and `see_comment_edited_on_other_device.yaml`. **`MAESTRO_E2E_CHAT_MESSAGE_TEXT`** — DM body for `chat_dm_send` / `chat_dm_receive`.
 - **Device IDs**: When both iOS and Android are running, set `MAESTRO_DEVICE_ID_IOS` and `MAESTRO_DEVICE_ID_ANDROID` so each platform’s flows run on the correct device. Get IDs from `flutter devices` (e.g. iPhone 15 Pro UUID, `emulator-5556`). Example: `export MAESTRO_DEVICE_ID_IOS="90266925-B62F-4741-A89E-EF11BFA0CC57" MAESTRO_DEVICE_ID_ANDROID="emulator-5556"`.
 
 ## Flows
@@ -75,6 +75,11 @@ maestro test flows/connection.yaml
 | `initiate_connection_a_to_b.yaml` | **Device A**: initiate connection from A to B (A adds B by pasting B's code). Requires `CONNECTION_CODE` env var set to B's code. Run after B has displayed its code (`connection.yaml` on B). *Execution so far:* tests run with non-empty DB for simplicity; in future e2e will be tested from an empty database. |
 | `see_post_on_other_device.yaml` | **Receiver device**: ensure Feed, then wait for "E2E test post from Maestro" (up to 45s). Run on device B after device A ran `post.yaml`; requires A and B to be connected. |
 | `see_comment_on_other_device.yaml` | **Receiver device**: ensure Feed, then wait for "E2E comment from Maestro" (up to 45s). Run on device A after device B ran `comment.yaml`; verifies comment sync to connections. |
+| `see_comment_edited_on_other_device.yaml` | **Receiver (e.g. Android)** after author ran `edit_comment.yaml` with `MAESTRO_E2E_EDITED_COMMENT_TEXT`; asserts edited body on feed. |
+| `chat_open_list.yaml` | Open Chat tab; assert **Chat** title (empty list or conversations). |
+| `chat_dm_send.yaml` / `chat_dm_receive.yaml` | Two-device DM: sender opens `chat_list_first_row`, types `MAESTRO_E2E_CHAT_MESSAGE_TEXT`, sends; receiver opens first row and asserts text. Requires mutual connection and at least one list row. |
+| `frozen_slot_paused_assert.yaml` | **Optional**: assert `connection_slot_paused_badge` on Connections. Requires a **data precondition** (e.g. slot subscription `past_due` / frozen slot) — set manually or via DB before running. |
+| `transfer_open_from_settings_debug.yaml` | **Debug build only**: Settings → E2E transfer tile → `transfer_instructions_start`. |
 | `ensure_feed.yaml` | Subflow: if login screen visible, tap sign-in and wait for Feed; then assert Feed. Used by other flows (app is already running). |
 | `android_enable_airplane.yaml` | **Android only**: enable airplane mode. Run before iOS post in delayed-delivery E2E so receiver is offline. |
 | `delayed_delivery_recovery.yaml` | **Android**: disable airplane, ensure feed, Settings → Refresh feed, back to Feed, wait for post (env: `MAESTRO_E2E_DELAYED_POST_TEXT`). Run after `android_enable_airplane` → iOS post → `redis_clear_delivery_queue.sh`. |
@@ -118,6 +123,24 @@ To verify that comments sync to connections (post author's connections receive t
    This waits for "E2E comment from Maestro" to appear (up to 45s) and asserts it is visible.
 
 Flow order: **Device A** `post.yaml` → **Device B** `see_post_on_other_device.yaml` → **Device B** `comment.yaml` → **Device A** `see_comment_on_other_device.yaml`.
+
+### Two-device comment **edit** sync (optional)
+
+Use `./scripts/run-e2e.sh --comment-edit-sync` so that after Android sees the new comment, iOS runs `edit_comment.yaml`, Android runs `see_comment_edited_on_other_device.yaml`, and the delete step targets **`MAESTRO_E2E_COMMENT_DELETE_TEXT`** (automatically aligned with the edited text).
+
+Manual order: same posting/comment steps as above, then **iOS** `edit_comment.yaml` (set `MAESTRO_E2E_EDITED_COMMENT_TEXT`) → **Android** `see_comment_edited_on_other_device.yaml` → export `MAESTRO_E2E_COMMENT_DELETE_TEXT` to the same edited value → **iOS** `delete_comment.yaml` → **Android** `see_comment_deleted_on_other_device.yaml`.
+
+### Chat DM smoke (two devices)
+
+Prerequisites: mutual connection; Chat list shows at least one row (pending DM or existing thread). Run `./scripts/run-e2e.sh --chat` after the default between-devices sequence, or manually: **iOS** `chat_dm_send.yaml` → wait a few seconds → **Android** `chat_dm_receive.yaml` with the same `MAESTRO_E2E_CHAT_MESSAGE_TEXT`.
+
+### Frozen (“Paused”) slots
+
+There is no automated API reset in this repo for freezing a slot. Before `frozen_slot_paused_assert.yaml`, prepare data so at least one occupied slot is billing-frozen (e.g. SQL / ops on `slot_subscriptions` for a test user). Then open Connections and run the flow.
+
+### Device transfer (debug)
+
+`settings_transfer_test_flow` and `transfer_open_from_settings_debug.yaml` work only in **debug** Flutter builds. They open `TransferFlowScreen` as a new device so Maestro can assert `transfer_instructions_start` / `transfer_confirm_continue` on the appropriate steps.
 
 ### Delayed delivery recovery
 
@@ -202,6 +225,16 @@ The Crucially app exposes test IDs for Maestro where needed:
 - `app_bar_profile_drawer` — Profile/drawer button in app bar.
 - `comment_submit` — Send comment button.
 - `login_sign_in_button` — Sign-in button on login screen (Continue with Google / Apple).
+- `nav_chat`, `nav_connections`, `nav_settings` — Bottom navigation (with `nav_feed`, `nav_updates`).
+- `chat_fab_new_group` — Chat list FAB (new group).
+- `chat_list_first_row` / `chat_list_row_<n>` — Chat list rows.
+- `chat_message_input`, `chat_send_button`, `chat_attach_image_button` — Thread composer; `chat_paused_banner_dismiss` — disconnect banner dismiss.
+- `connections_tier_layer_chips` — Horizontal tier chip list; `connections_unlock_next_layer_button` — unlock next layer CTA.
+- `billing_unlock_sheet_continue` — Unlock sheet “Continue to payment”.
+- `staging_checkout_screen_title`, `staging_checkout_pay_button` — Pre–store staging checkout screen (no Maestro payment flows in this repo; IDs reserved for future staging IAP tests).
+- `connection_slot_paused_badge` / `connection_slot_paused_badge_<slotIndex>` — Frozen slot “Paused” chip (tier grid / legacy staggered grid).
+- `settings_transfer_test_flow` — Debug-only Settings entry to open transfer flow (new device).
+- `transfer_instructions_start`, `transfer_confirm_continue`, `transfer_confirm_cancel` — Transfer flow primary actions.
 
 Flows also use visible text (e.g. "Feed", "Post", "What's on your mind?", "Write a comment...") for stability across i18n when IDs are not required.
 

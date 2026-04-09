@@ -9,9 +9,9 @@ appId: ${MAESTRO_APP_ID}
 # After sync, the deleted comment must not be visible
 - extendedWaitUntil:
     notVisible:
-      text: "${MAESTRO_E2E_COMMENT_TEXT}"
+      text: "${MAESTRO_E2E_COMMENT_DELETE_TEXT}"
     timeout: 5000
     label: "Wait for comment to disappear after sync"
 - assertNotVisible:
-    text: "${MAESTRO_E2E_COMMENT_TEXT}"
+    text: "${MAESTRO_E2E_COMMENT_DELETE_TEXT}"
     label: "Comment deleted and synced: not visible on other device"

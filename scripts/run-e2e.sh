@@ -4,7 +4,11 @@
 #
 # Usage:
 #   ./scripts/run-e2e.sh [--ios-only|--android-only] [--with-notifications] [--delayed-delivery]
+#     [--comment-edit-sync] [--chat]
 #   iOS = author (post, comment, delete). Android = receiver (see post, see comment, assert comment gone after sync).
+#   --comment-edit-sync: after B sees comment, iOS runs edit_comment; B runs see_comment_edited_on_other_device;
+#     delete step uses MAESTRO_E2E_COMMENT_DELETE_TEXT (set to edited text automatically).
+#   --chat: after main sequence, iOS chat_dm_send then Android chat_dm_receive (needs chat list row; mutual connection).
 #   --delayed-delivery: Android airplane on → iOS post → clear Redis → Android airplane off + Sync → assert recovered post.
 set -e
 
@@ -24,12 +28,16 @@ DEVICE_ID_ANDROID="${MAESTRO_DEVICE_ID_ANDROID:-emulator-5554}"
 PLATFORM=""
 RUN_NOTIFICATIONS=false
 RUN_DELAYED_DELIVERY=false
+RUN_COMMENT_EDIT_SYNC=false
+RUN_CHAT_DM=false
 while [[ $# -gt 0 ]]; do
   case $1 in
     --ios-only) PLATFORM=ios; shift ;;
     --android-only) PLATFORM=android; shift ;;
     --with-notifications) RUN_NOTIFICATIONS=true; shift ;;
     --delayed-delivery) RUN_DELAYED_DELIVERY=true; shift ;;
+    --comment-edit-sync) RUN_COMMENT_EDIT_SYNC=true; shift ;;
+    --chat) RUN_CHAT_DM=true; shift ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
 done
@@ -37,8 +45,10 @@ done
 # Unique post text for this run (timestamp so we don't match old posts with same text)
 export MAESTRO_E2E_POST_TEXT="${MAESTRO_E2E_POST_TEXT:-e2e post $(date +%s)}"
 export MAESTRO_E2E_COMMENT_TEXT="${MAESTRO_E2E_COMMENT_TEXT:-e2e comment $(date +%s)}"
+export MAESTRO_E2E_COMMENT_DELETE_TEXT="${MAESTRO_E2E_COMMENT_DELETE_TEXT:-$MAESTRO_E2E_COMMENT_TEXT}"
 echo "E2E post text: $MAESTRO_E2E_POST_TEXT"
 echo "E2E comment text: $MAESTRO_E2E_COMMENT_TEXT"
+echo "E2E comment delete target text: $MAESTRO_E2E_COMMENT_DELETE_TEXT"
 
 # Optional: reset test data before tests (script or HTTP)
 if [ -n "${E2E_RESET_SCRIPT:-}" ] && [ -x "$E2E_RESET_SCRIPT" ]; then
@@ -114,6 +124,22 @@ if [ "$PLATFORM" = "android" ] || [ -z "$PLATFORM" ]; then
   echo "Step 4: Android — see comment"
   run_maestro "$APP_ID_ANDROID" "see_comment_on_other_device" "$DEVICE_ID_ANDROID"
 fi
+if [ "$RUN_COMMENT_EDIT_SYNC" = true ]; then
+  export MAESTRO_E2E_EDITED_COMMENT_TEXT="${MAESTRO_E2E_EDITED_COMMENT_TEXT:-e2e edited comment $(date +%s)}"
+  echo "E2E edited comment text: $MAESTRO_E2E_EDITED_COMMENT_TEXT"
+  if [ "$PLATFORM" = "ios" ] || [ -z "$PLATFORM" ]; then
+    echo "Step 4b: iOS — edit comment (COMMENT_EDITED sync)"
+    run_maestro "$APP_ID_IOS" "edit_comment" "$DEVICE_ID_IOS"
+    echo "Waiting 3s for COMMENT_EDITED to propagate..."
+    sleep 3
+  fi
+  if [ "$PLATFORM" = "android" ] || [ -z "$PLATFORM" ]; then
+    echo "Step 4c: Android — see edited comment on other device"
+    run_maestro "$APP_ID_ANDROID" "see_comment_edited_on_other_device" "$DEVICE_ID_ANDROID"
+  fi
+  export MAESTRO_E2E_COMMENT_DELETE_TEXT="$MAESTRO_E2E_EDITED_COMMENT_TEXT"
+  echo "Delete step will target edited text: $MAESTRO_E2E_COMMENT_DELETE_TEXT"
+fi
 if [ "$PLATFORM" = "ios" ] || [ -z "$PLATFORM" ]; then
   echo "Step 5: iOS — delete comment (US-010)"
   run_maestro "$APP_ID_IOS" "delete_comment" "$DEVICE_ID_IOS"
@@ -125,6 +151,20 @@ if [ "$PLATFORM" = "android" ] || [ -z "$PLATFORM" ]; then
   run_maestro "$APP_ID_ANDROID" "see_comment_deleted_on_other_device" "$DEVICE_ID_ANDROID"
 fi
 echo "Between-devices test finished."
+
+if [ "$RUN_CHAT_DM" = true ]; then
+  export MAESTRO_E2E_CHAT_MESSAGE_TEXT="${MAESTRO_E2E_CHAT_MESSAGE_TEXT:-e2e chat $(date +%s)}"
+  echo "--- Chat DM (mutual connection + chat row required) ---"
+  echo "E2E chat message: $MAESTRO_E2E_CHAT_MESSAGE_TEXT"
+  if [ "$PLATFORM" = "ios" ] || [ -z "$PLATFORM" ]; then
+    run_maestro "$APP_ID_IOS" "chat_dm_send" "$DEVICE_ID_IOS"
+    echo "Waiting 5s for chat message sync..."
+    sleep 5
+  fi
+  if [ "$PLATFORM" = "android" ] || [ -z "$PLATFORM" ]; then
+    run_maestro "$APP_ID_ANDROID" "chat_dm_receive" "$DEVICE_ID_ANDROID"
+  fi
+fi
 
 if [ "$RUN_NOTIFICATIONS" = true ]; then
   echo "--- Notifications (receiver) ---"

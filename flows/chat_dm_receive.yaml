@@ -1,0 +1,19 @@
+# Two-device receiver: open same first-row chat and wait for MAESTRO_E2E_CHAT_MESSAGE_TEXT.
+# Run after chat_dm_send on the other device (allow a few seconds for sync).
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- tapOn:
+    id: "nav_chat"
+- extendedWaitUntil:
+    visible: "Chat"
+    timeout: 8000
+- tapOn:
+    id: "chat_list_first_row"
+- extendedWaitUntil:
+    visible: "${MAESTRO_E2E_CHAT_MESSAGE_TEXT}"
+    timeout: 25000
+    label: "Peer message visible in thread"
+- assertVisible:
+    text: "${MAESTRO_E2E_CHAT_MESSAGE_TEXT}"

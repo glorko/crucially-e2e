@@ -1,0 +1,20 @@
+# Debug builds only: Settings → E2E device transfer → instructions screen (semantics hooks).
+# Requires a debug Flutter build (settings_transfer_test_flow is hidden in release).
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- tapOn:
+    id: "nav_settings"
+- scrollUntilVisible:
+    element:
+      id: "settings_transfer_test_flow"
+    direction: DOWN
+    timeout: 8000
+- tapOn:
+    id: "settings_transfer_test_flow"
+- extendedWaitUntil:
+    visible:
+      id: "transfer_instructions_start"
+    timeout: 10000
+    label: "Transfer instructions primary button"

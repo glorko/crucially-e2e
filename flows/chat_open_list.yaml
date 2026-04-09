@@ -1,0 +1,11 @@
+# Smoke: open Chat tab and assert list or empty state (requires mutual connections for rows).
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- tapOn:
+    id: "nav_chat"
+- extendedWaitUntil:
+    visible: "Chat"
+    timeout: 8000
+    label: "Chat tab title visible"
