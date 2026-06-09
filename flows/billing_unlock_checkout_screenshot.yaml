@@ -1,0 +1,22 @@
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ensure_feed.yaml
+- tapOn:
+    id: "nav_connections"
+- extendedWaitUntil:
+    visible: "Connections"
+    timeout: 10000
+- tapOn:
+    id: "connections_unlock_next_layer_button"
+- extendedWaitUntil:
+    visible:
+      id: "billing_unlock_sheet_continue"
+    timeout: 10000
+- tapOn:
+    id: "billing_unlock_sheet_continue"
+- extendedWaitUntil:
+    visible:
+      id: "store_checkout_screen_title"
+    timeout: 10000
+- takeScreenshot: "apple_review_billing_checkout"
