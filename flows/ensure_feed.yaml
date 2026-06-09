@@ -16,24 +16,6 @@ appId: ${MAESTRO_APP_ID}
 - tapOn:
     text: "Cancel"
     optional: true
-# iOS simulator can show Apple ID verification interstitial.
-- tapOn:
-    text: "Not Now"
-    optional: true
-# If auth screen is visible, trigger platform sign-in first.
-- tapOn:
-    id: "login_sign_in_button"
-    optional: true
-- tapOn:
-    text: "Continue with Apple"
-    optional: true
-- tapOn:
-    text: "Continue with Password"
-    optional: true
-# Apple ID interstitial can re-appear right after sign-in tap.
-- tapOn:
-    text: "Not Now"
-    optional: true
 # Tap Feed tab to ensure we're on feed (handles being on another tab)
 - tapOn:
     id: "nav_feed"
