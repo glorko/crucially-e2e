@@ -22,8 +22,15 @@ E2E_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 APP_ID_IOS="${MAESTRO_APP_ID_IOS:-app.crucially.ios}"
 APP_ID_ANDROID="${MAESTRO_APP_ID_ANDROID:-app.crucially.android}"
-DEVICE_ID_IOS="${MAESTRO_DEVICE_ID_IOS:-90266925-B62F-4741-A89E-EF11BFA0CC57}"
+# No default iOS device: require MAESTRO_DEVICE_ID_IOS rather than baking in a
+# specific simulator UDID (it was one contributor's personal device, useless to
+# everyone else and a small PII leak). Fail fast with a clear message instead.
+DEVICE_ID_IOS="${MAESTRO_DEVICE_ID_IOS:-}"
 DEVICE_ID_ANDROID="${MAESTRO_DEVICE_ID_ANDROID:-emulator-5554}"
+if [ -z "$DEVICE_ID_IOS" ] && [ "${1:-}" != "--android-only" ]; then
+  echo "error: set MAESTRO_DEVICE_ID_IOS to your iOS simulator UDID (xcrun simctl list devices), or pass --android-only" >&2
+  exit 1
+fi
 
 PLATFORM=""
 RUN_NOTIFICATIONS=false

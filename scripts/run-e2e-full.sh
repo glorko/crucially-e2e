@@ -21,7 +21,9 @@ E2E_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 APP_ID_IOS="${MAESTRO_APP_ID_IOS:-app.crucially.ios}"
 APP_ID_ANDROID="${MAESTRO_APP_ID_ANDROID:-app.crucially.android}"
-DEVICE_ID_IOS="${MAESTRO_DEVICE_ID_IOS:-90266925-B62F-4741-A89E-EF11BFA0CC57}"
+# Require MAESTRO_DEVICE_ID_IOS rather than defaulting to a contributor's
+# personal simulator UDID (useless to others; a small PII leak).
+DEVICE_ID_IOS="${MAESTRO_DEVICE_ID_IOS:-}"
 DEVICE_ID_ANDROID="${MAESTRO_DEVICE_ID_ANDROID:-emulator-5554}"
 
 PLATFORM=""
@@ -34,6 +36,13 @@ while [[ $# -gt 0 ]]; do
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
 done
+
+# iOS runs need a simulator UDID; fail fast with a clear message rather than
+# passing an empty --device to maestro (or relying on a baked-in personal UDID).
+if [ "$PLATFORM" != "android" ] && [ -z "$DEVICE_ID_IOS" ]; then
+  echo "error: set MAESTRO_DEVICE_ID_IOS to your iOS simulator UDID (xcrun simctl list devices), or pass --android-only" >&2
+  exit 1
+fi
 
 TS=$(date +%s)
 export MAESTRO_E2E_POST_TEXT="e2e post $TS"
