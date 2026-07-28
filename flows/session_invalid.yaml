@@ -15,12 +15,7 @@ appId: ${MAESTRO_APP_ID}
 - extendedWaitUntil:
     visible: "Settings"
     timeout: 5000
-# Verify logout button exists (means user is authenticated)
-- scrollUntilVisible:
-    element:
-      id: "settings_logout"
-    direction: DOWN
-    timeout: 5000
+# Logout icon lives on the profile header (means user is authenticated)
 - assertVisible:
     id: "settings_logout"
     label: "Logout visible - user authenticated"

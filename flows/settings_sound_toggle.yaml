@@ -19,6 +19,9 @@ appId: ${MAESTRO_APP_ID}
     visible: "Settings"
     timeout: 10000
     label: "Settings screen loaded"
+- tapOn:
+    id: "settings_tab_experience"
+    label: "Open Experience tab"
 # Tap sound toggle using Semantics identifier
 - tapOn:
     id: "settings_sound_toggle"

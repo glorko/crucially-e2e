@@ -17,6 +17,9 @@ appId: ${MAESTRO_APP_ID}
 - tapOn:
     id: "nav_settings"
 - tapOn:
+    id: "settings_tab_system"
+    label: "Open System tab"
+- tapOn:
     id: "settings_refresh_feed"
 - tapOn:
     id: "nav_feed"

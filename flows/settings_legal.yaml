@@ -15,6 +15,9 @@ appId: ${MAESTRO_APP_ID}
 - extendedWaitUntil:
     visible: "Settings"
     timeout: 10000
+- tapOn:
+    id: "settings_tab_resources"
+    label: "Open Resources tab"
 # Assert legal links via Semantics IDs
 - extendedWaitUntil:
     visible:
